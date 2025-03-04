@@ -51,7 +51,8 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
     
     // For handling when a user taps on a notification
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        let identifier = response.notification.request.identifier
+        // Get the notification identifier but use underscore since we're not using it yet
+        let _ = response.notification.request.identifier
         
         // Here you can handle different types of notifications
         // by checking their identifiers

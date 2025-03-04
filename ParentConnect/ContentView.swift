@@ -5,6 +5,7 @@ import MapKit
 struct ContentView: View {
     @State private var selectedTab = 0
     @State private var isLoggedIn = false
+    @State private var showingEventsView = false
     @EnvironmentObject var locationManager: LocationManager
     @EnvironmentObject var notificationManager: NotificationManager
     
@@ -36,6 +37,32 @@ struct ContentView: View {
                     .tag(3)
             }
             .accentColor(Color("AppPrimaryColor"))
+            .overlay(
+                VStack {
+                    HStack {
+                        Spacer()
+                        
+                        Button(action: {
+                            showingEventsView = true
+                        }) {
+                            Image(systemName: "calendar.badge.plus")
+                                .font(.system(size: 22))
+                                .foregroundColor(.white)
+                                .frame(width: 50, height: 50)
+                                .background(Color("AppPrimaryColor"))
+                                .clipShape(Circle())
+                                .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 10)
+                    }
+                    
+                    Spacer()
+                }, alignment: .bottom
+            )
+            .sheet(isPresented: $showingEventsView) {
+                EventsView()
+            }
         } else {
             LoginView(isLoggedIn: $isLoggedIn)
         }

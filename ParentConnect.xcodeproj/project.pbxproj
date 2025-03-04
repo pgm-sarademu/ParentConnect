@@ -15,6 +15,7 @@
 		56AB348F2D763E23006A471B /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB348E2D763E23006A471B /* NotificationManager.swift */; };
 		56AB34912D763E49006A471B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34902D763E49006A471B /* AppDelegate.swift */; };
 		56AB34972D7769A6006A471B /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34962D7769A6006A471B /* LocationManager.swift */; };
+		56AB34A12D77931E006A471B /* EventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34A02D77931E006A471B /* EventsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +44,7 @@
 		56AB348E2D763E23006A471B /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		56AB34902D763E49006A471B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		56AB34962D7769A6006A471B /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		56AB34A02D77931E006A471B /* EventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsView.swift; sourceTree = "<group>"; };
 		56C328CE2D723EAB005E6E8C /* ParentConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ParentConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		56C328E52D723EAD005E6E8C /* ParentConnectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ParentConnectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		56C328EF2D723EAD005E6E8C /* ParentConnectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ParentConnectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -107,6 +109,7 @@
 		56C328C52D723EAB005E6E8C = {
 			isa = PBXGroup;
 			children = (
+				56AB34A02D77931E006A471B /* EventsView.swift */,
 				56AB34962D7769A6006A471B /* LocationManager.swift */,
 				56AB34902D763E49006A471B /* AppDelegate.swift */,
 				56AB348E2D763E23006A471B /* NotificationManager.swift */,
@@ -276,6 +279,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				56AB34A12D77931E006A471B /* EventsView.swift in Sources */,
 				56AB34362D743CF6006A471B /* MessageView.swift in Sources */,
 				56AB34912D763E49006A471B /* AppDelegate.swift in Sources */,
 				56AB34552D75D11B006A471B /* ProfileView.swift in Sources */,

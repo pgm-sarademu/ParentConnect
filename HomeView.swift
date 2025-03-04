@@ -2,11 +2,25 @@ import SwiftUI
 import CoreData
 import MapKit
 
+// Models
+struct ParentPreview: Identifiable {
+    let id: String
+    let name: String
+    let distance: String
+    let childrenInfo: String
+}
+
+struct ActivityPreview: Identifiable {
+    let id: String
+    let title: String
+    let type: String
+}
+
 struct HomeView: View {
     @EnvironmentObject var locationManager: LocationManager
     @State private var nearbyParents: [ParentPreview] = []
-    @State private var upcomingEvents: [EventPreview] = []
     @State private var featuredActivities: [ActivityPreview] = []
+    @State private var showingEventsView = false
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
         span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
@@ -54,10 +68,22 @@ struct HomeView: View {
                 
                 // Nearby parents section
                 VStack(alignment: .leading) {
-                    Text("Connect with Parents")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .padding(.horizontal)
+                    HStack {
+                        Text("Connect with Parents")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            // View all nearby parents
+                        }) {
+                            Text("See All")
+                                .font(.subheadline)
+                                .foregroundColor(Color("AppPrimaryColor"))
+                        }
+                    }
+                    .padding(.horizontal)
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 15) {
@@ -69,29 +95,82 @@ struct HomeView: View {
                     }
                 }
                 
-                // Upcoming events section
+                // Events section - now a button to navigate to Events
                 VStack(alignment: .leading) {
-                    Text("Upcoming Events")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .padding(.horizontal)
-                    
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 15) {
-                            ForEach(upcomingEvents) { event in
-                                EventCard(event: event)
+                    Button(action: {
+                        showingEventsView = true
+                    }) {
+                        HStack {
+                            Text("Upcoming Events")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                            
+                            Spacer()
+                            
+                            HStack {
+                                Text("View All")
+                                    .font(.subheadline)
+                                Image(systemName: "chevron.right")
                             }
+                            .foregroundColor(Color("AppPrimaryColor"))
                         }
+                        .padding(.horizontal)
+                    }
+                    
+                    Text("Check out local events for you and your children")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal)
+                        .padding(.top, 2)
+                        .padding(.bottom, 8)
+                    
+                    Button(action: {
+                        showingEventsView = true
+                    }) {
+                        HStack {
+                            Image(systemName: "calendar")
+                                .font(.system(size: 40))
+                                .foregroundColor(Color("AppPrimaryColor"))
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Explore Events")
+                                    .font(.headline)
+                                
+                                Text("Find family-friendly activities near you")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                        }
+                        .padding()
+                        .background(Color(.systemBackground))
+                        .cornerRadius(12)
+                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
                         .padding(.horizontal)
                     }
                 }
                 
                 // Activities section
                 VStack(alignment: .leading) {
-                    Text("Activities & Printables")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .padding(.horizontal)
+                    HStack {
+                        Text("Activities & Printables")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        Spacer()
+                        
+                        NavigationLink(destination: ActivitiesView()) {
+                            Text("See All")
+                                .font(.subheadline)
+                                .foregroundColor(Color("AppPrimaryColor"))
+                        }
+                    }
+                    .padding(.horizontal)
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 15) {
@@ -106,6 +185,9 @@ struct HomeView: View {
             .padding(.vertical)
         }
         .navigationTitle("Parent Connect")
+        .sheet(isPresented: $showingEventsView) {
+            EventsView()
+        }
         .onAppear {
             loadMockData()
             
@@ -165,13 +247,6 @@ struct HomeView: View {
             ParentPreview(id: "3", name: "Emma Roberts", distance: "1.2 miles", childrenInfo: "3 kids (2, 5, 7)")
         ]
         
-        // Load mock data for upcoming events
-        upcomingEvents = [
-            EventPreview(id: "1", title: "Storytime at Library", date: Date().addingTimeInterval(86400), location: "Central Library"),
-            EventPreview(id: "2", title: "Park Playdate", date: Date().addingTimeInterval(172800), location: "Sunshine Park"),
-            EventPreview(id: "3", title: "Kids Art Class", date: Date().addingTimeInterval(259200), location: "Community Center")
-        ]
-        
         // Load mock data for featured activities
         featuredActivities = [
             ActivityPreview(id: "1", title: "Dinosaur Coloring Pages", type: "Printable"),
@@ -181,28 +256,7 @@ struct HomeView: View {
     }
 }
 
-// Models
-struct ParentPreview: Identifiable {
-    let id: String
-    let name: String
-    let distance: String
-    let childrenInfo: String
-}
-
-struct EventPreview: Identifiable {
-    let id: String
-    let title: String
-    let date: Date
-    let location: String
-}
-
-struct ActivityPreview: Identifiable {
-    let id: String
-    let title: String
-    let type: String
-}
-
-// Component views
+// Parent Card Component (remaining the same)
 struct ParentCard: View {
     let parent: ParentPreview
     
@@ -248,48 +302,6 @@ struct ParentCard: View {
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
         .frame(width: 160)
-    }
-}
-
-struct EventCard: View {
-    let event: EventPreview
-    
-    var body: some View {
-        VStack(alignment: .leading) {
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.gray.opacity(0.3))
-                .frame(height: 100)
-                .overlay(
-                    Text("🎪")
-                        .font(.system(size: 40))
-                )
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(event.title)
-                    .font(.headline)
-                    .lineLimit(1)
-                
-                Text(formatDate(event.date))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Text(event.location)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(8)
-        }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-        .frame(width: 200)
-    }
-    
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
     }
 }
 
