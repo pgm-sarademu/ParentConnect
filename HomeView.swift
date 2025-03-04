@@ -20,7 +20,6 @@ struct HomeView: View {
     @EnvironmentObject var locationManager: LocationManager
     @State private var nearbyParents: [ParentPreview] = []
     @State private var featuredActivities: [ActivityPreview] = []
-    @State private var showingEventsView = false
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
         span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
@@ -95,65 +94,9 @@ struct HomeView: View {
                     }
                 }
                 
-                // Events section - now a button to navigate to Events
-                VStack(alignment: .leading) {
-                    Button(action: {
-                        showingEventsView = true
-                    }) {
-                        HStack {
-                            Text("Upcoming Events")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.primary)
-                            
-                            Spacer()
-                            
-                            HStack {
-                                Text("View All")
-                                    .font(.subheadline)
-                                Image(systemName: "chevron.right")
-                            }
-                            .foregroundColor(Color("AppPrimaryColor"))
-                        }
-                        .padding(.horizontal)
-                    }
-                    
-                    Text("Check out local events for you and your children")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal)
-                        .padding(.top, 2)
-                        .padding(.bottom, 8)
-                    
-                    Button(action: {
-                        showingEventsView = true
-                    }) {
-                        HStack {
-                            Image(systemName: "calendar")
-                                .font(.system(size: 40))
-                                .foregroundColor(Color("AppPrimaryColor"))
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Explore Events")
-                                    .font(.headline)
-                                
-                                Text("Find family-friendly activities near you")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            Spacer()
-                            
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.secondary)
-                        }
-                        .padding()
-                        .background(Color(.systemBackground))
-                        .cornerRadius(12)
-                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                        .padding(.horizontal)
-                    }
-                }
+                // Spacer between sections
+                Spacer()
+                    .frame(height: 20)
                 
                 // Activities section
                 VStack(alignment: .leading) {
@@ -185,9 +128,6 @@ struct HomeView: View {
             .padding(.vertical)
         }
         .navigationTitle("Parent Connect")
-        .sheet(isPresented: $showingEventsView) {
-            EventsView()
-        }
         .onAppear {
             loadMockData()
             
