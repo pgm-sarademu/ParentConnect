@@ -5,6 +5,8 @@ import MapKit
 struct ContentView: View {
     @State private var selectedTab = 0
     @State private var isLoggedIn = false
+    @EnvironmentObject var locationManager: LocationManager
+    @EnvironmentObject var notificationManager: NotificationManager
     
     var body: some View {
         if isLoggedIn {
@@ -15,35 +17,23 @@ struct ContentView: View {
                     }
                     .tag(0)
                 
-                PlaydatesView()
-                    .tabItem {
-                        Label("Playdates", systemImage: "figure.2.and.child.holdinghands")
-                    }
-                    .tag(1)
-                
                 MessagesView()
                     .tabItem {
                         Label("Messages", systemImage: "message.fill")
                     }
-                    .tag(2)
-                
-                EventsView()
-                    .tabItem {
-                        Label("Events", systemImage: "calendar")
-                    }
-                    .tag(3)
+                    .tag(1)
                 
                 ActivitiesView()
                     .tabItem {
                         Label("Activities", systemImage: "doc.fill")
                     }
-                    .tag(4)
+                    .tag(2)
                 
                 ProfileView()
                     .tabItem {
                         Label("Profile", systemImage: "person.fill")
                     }
-                    .tag(5)
+                    .tag(3)
             }
             .accentColor(Color("AppPrimaryColor"))
         } else {
@@ -88,6 +78,9 @@ struct LoginView: View {
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
+                    .keyboardType(.emailAddress)
             }
             
             // Password field
@@ -160,5 +153,7 @@ struct LoginView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .environmentObject(LocationManager())
+            .environmentObject(NotificationManager.shared)
     }
 }

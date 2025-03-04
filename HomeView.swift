@@ -3,11 +3,10 @@ import CoreData
 import MapKit
 
 struct HomeView: View {
+    @EnvironmentObject var locationManager: LocationManager
     @State private var nearbyParents: [ParentPreview] = []
     @State private var upcomingEvents: [EventPreview] = []
     @State private var featuredActivities: [ActivityPreview] = []
-    @State private var playdates: [Playdate] = []
-    @State private var showingCreatePlaydateSheet = false
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
         span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
@@ -18,18 +17,28 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 20) {
                 // Map section
                 ZStack(alignment: .bottom) {
+                    // Fixed Map implementation
                     if #available(iOS 17.0, *) {
-                        Map {
-                            // You can add markers here when needed
+                        Map(initialPosition: MapCameraPosition.region(region)) {
+                            ForEach(nearbyParents) { parent in
+                                if let coord = getParentCoordinates(parent) {
+                                    Marker(parent.name, coordinate: coord)
+                                        .tint(Color("AppPrimaryColor"))
+                                }
+                            }
                         }
                         .mapStyle(.standard)
                         .frame(height: 200)
                         .cornerRadius(12)
                     } else {
                         // Fallback for iOS 16 and earlier
-                        Map(coordinateRegion: $region)
-                            .frame(height: 200)
-                            .cornerRadius(12)
+                        // Create annotated items first
+                        let annotatedItems = createAnnotatedItems()
+                        Map(coordinateRegion: $region, annotationItems: annotatedItems) { item in
+                            MapMarker(coordinate: item.coordinate, tint: Color("AppPrimaryColor"))
+                        }
+                        .frame(height: 200)
+                        .cornerRadius(12)
                     }
                     
                     Text("Parents Near You")
@@ -59,9 +68,6 @@ struct HomeView: View {
                         .padding(.horizontal)
                     }
                 }
-                
-                // Playdates section
-                PlaydatesSection(playdates: $playdates, showingCreatePlaydateSheet: $showingCreatePlaydateSheet)
                 
                 // Upcoming events section
                 VStack(alignment: .leading) {
@@ -102,10 +108,53 @@ struct HomeView: View {
         .navigationTitle("Parent Connect")
         .onAppear {
             loadMockData()
+            
+            // Update map with user's location if available
+            if let userLocation = locationManager.location?.coordinate {
+                region = MKCoordinateRegion(
+                    center: userLocation,
+                    span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
+                )
+            }
         }
-        .sheet(isPresented: $showingCreatePlaydateSheet) {
-            CreatePlaydateView(playdates: $playdates)
+    }
+    
+    // Helper struct for Map annotations
+    struct AnnotatedParent: Identifiable {
+        let id: String
+        let name: String
+        let coordinate: CLLocationCoordinate2D
+    }
+    
+    // Helper function to pre-create annotated items
+    private func createAnnotatedItems() -> [AnnotatedParent] {
+        var items = [AnnotatedParent]()
+        
+        for parent in nearbyParents {
+            if let coord = getParentCoordinates(parent) {
+                items.append(AnnotatedParent(id: parent.id, name: parent.name, coordinate: coord))
+            }
         }
+        
+        return items
+    }
+    
+    // Helper function to get coordinates from a ParentPreview
+    private func getParentCoordinates(_ parent: ParentPreview) -> CLLocationCoordinate2D? {
+        // Mock implementation - in a real app, this would use actual stored coordinates
+        let baseLocation = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+        
+        // Generate a small random offset based on parent.id to differentiate the markers
+        if let idNum = Int(parent.id) {
+            let latOffset = Double(idNum % 10) * 0.002
+            let longOffset = Double((idNum * 3) % 10) * 0.002
+            return CLLocationCoordinate2D(
+                latitude: baseLocation.latitude + latOffset,
+                longitude: baseLocation.longitude + longOffset
+            )
+        }
+        
+        return baseLocation
     }
     
     private func loadMockData() {
@@ -129,9 +178,6 @@ struct HomeView: View {
             ActivityPreview(id: "2", title: "Sensory Play Ideas", type: "Guide"),
             ActivityPreview(id: "3", title: "Letters Tracing Worksheet", type: "Printable")
         ]
-        
-        // Load mock playdates
-        playdates = generateMockPlaydates()
     }
 }
 

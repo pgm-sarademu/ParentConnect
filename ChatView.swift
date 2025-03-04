@@ -63,12 +63,23 @@ struct ChatView: View {
                         scrollView.scrollTo(lastMessage.id, anchor: .bottom)
                     }
                 }
-                // Updated onChange for iOS 17 compatibility
-                .onChange(of: messages.count) {
+                
+                // Updated onChange for iOS 17+ compatibility with fallback for older versions
+                #if swift(>=5.9)
+                // iOS 17 and newer
+                .onChange(of: messages.count) { oldCount, newCount in
                     if let lastMessage = messages.last {
                         scrollView.scrollTo(lastMessage.id, anchor: .bottom)
                     }
                 }
+                #else
+                // iOS 16 and older
+                .onChange(of: messages.count) { newCount in
+                    if let lastMessage = messages.last {
+                        scrollView.scrollTo(lastMessage.id, anchor: .bottom)
+                    }
+                }
+                #endif
             }
             
             // Message input
