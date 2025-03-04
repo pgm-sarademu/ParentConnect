@@ -20,6 +20,7 @@ struct HomeView: View {
     @EnvironmentObject var locationManager: LocationManager
     @State private var nearbyParents: [ParentPreview] = []
     @State private var featuredActivities: [ActivityPreview] = []
+    @State private var upcomingEvents: [EventPreview] = []
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
         span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
@@ -64,6 +65,33 @@ struct HomeView: View {
                         .padding(.bottom, 8)
                 }
                 .padding(.horizontal)
+                
+                // Upcoming events section
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("Upcoming Events")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        Spacer()
+                        
+                        NavigationLink(destination: EventsView()) {
+                            Text("See All")
+                                .font(.subheadline)
+                                .foregroundColor(Color("AppPrimaryColor"))
+                        }
+                    }
+                    .padding(.horizontal)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 15) {
+                            ForEach(upcomingEvents) { event in
+                                HomeEventCard(event: event)
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
                 
                 // Nearby parents section
                 VStack(alignment: .leading) {
@@ -187,6 +215,16 @@ struct HomeView: View {
             ParentPreview(id: "3", name: "Emma Roberts", distance: "1.2 miles", childrenInfo: "3 kids (2, 5, 7)")
         ]
         
+        // Load mock data for upcoming events
+        let currentDate = Date()
+        let calendar = Calendar.current
+        
+        upcomingEvents = [
+            EventPreview(id: "1", title: "Storytime at Library", date: calendar.date(byAdding: .day, value: 1, to: currentDate) ?? currentDate, location: "Central Library"),
+            EventPreview(id: "2", title: "Park Playdate", date: calendar.date(byAdding: .day, value: 2, to: currentDate) ?? currentDate, location: "Sunshine Park"),
+            EventPreview(id: "3", title: "Kids Art Class", date: calendar.date(byAdding: .day, value: 3, to: currentDate) ?? currentDate, location: "Community Center")
+        ]
+        
         // Load mock data for featured activities
         featuredActivities = [
             ActivityPreview(id: "1", title: "Dinosaur Coloring Pages", type: "Printable"),
@@ -194,9 +232,16 @@ struct HomeView: View {
             ActivityPreview(id: "3", title: "Letters Tracing Worksheet", type: "Printable")
         ]
     }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
 }
 
-// Parent Card Component (remaining the same)
+// Parent Card Component
 struct ParentCard: View {
     let parent: ParentPreview
     
@@ -277,5 +322,48 @@ struct HomeActivityCard: View {
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
         .frame(width: 180)
+    }
+}
+
+// Event Card for Home View
+struct HomeEventCard: View {
+    let event: EventPreview
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 100)
+                .overlay(
+                    Text("🎪")
+                        .font(.system(size: 40))
+                )
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(event.title)
+                    .font(.headline)
+                    .lineLimit(1)
+                
+                Text(formatDate(event.date))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Text(event.location)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(8)
+        }
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .frame(width: 200)
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }

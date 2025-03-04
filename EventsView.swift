@@ -2,14 +2,6 @@ import SwiftUI
 import CoreData
 import MapKit
 
-// Event model
-struct EventPreview: Identifiable {
-    let id: String
-    let title: String
-    let date: Date
-    let location: String
-}
-
 struct EventsView: View {
     @State private var events: [EventPreview] = []
     @State private var searchText = ""
