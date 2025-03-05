@@ -101,20 +101,21 @@ struct EventsView: View {
         NavigationView {
             VStack {
                 // Filter summary bar
-                HStack {
+                HStack(spacing: 12) {
                     Button(action: {
                         showingFilters = true
                     }) {
-                        HStack {
-                            Image(systemName: "line.3.horizontal.decrease.circle")
-                                .font(.system(size: 16))
+                        HStack(spacing: 6) {
+                            Image(systemName: "slider.horizontal.3")
+                                .font(.system(size: 14))
                             Text("Filters")
+                                .font(.system(size: 15, weight: .medium))
                             
                             // Shows active filter count
                             if activeFilterCount > 0 {
                                 Text("\(activeFilterCount)")
-                                    .font(.caption)
-                                    .padding(5)
+                                    .font(.system(size: 12, weight: .bold))
+                                    .frame(width: 22, height: 22)
                                     .background(Color("AppPrimaryColor"))
                                     .foregroundColor(.white)
                                     .clipShape(Circle())
@@ -128,7 +129,7 @@ struct EventsView: View {
                     
                     // Active filter tags
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
+                        HStack(spacing: 8) {
                             if filters.priceFilter != .all {
                                 FilterTag(text: filters.priceFilter.rawValue) {
                                     filters.priceFilter = .all
@@ -162,7 +163,7 @@ struct EventsView: View {
                             resetFilters()
                         }) {
                             Text("Clear")
-                                .font(.caption)
+                                .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.primary)
                         }
                     }
@@ -239,21 +240,25 @@ struct EventsView: View {
                     NavigationLink(destination: NearbyEventsView()) {
                         HStack {
                             Image(systemName: "mappin.and.ellipse")
+                                .font(.system(size: 18))
                                 .foregroundColor(Color("AppPrimaryColor"))
                             
                             Text("Find Events Near Me")
-                                .font(.headline)
+                                .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(Color("AppPrimaryColor"))
                             
                             Spacer()
                             
                             Image(systemName: "chevron.right")
-                                .font(.caption)
+                                .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(Color("AppPrimaryColor"))
                         }
-                        .padding()
-                        .background(Color("AppPrimaryColor").opacity(0.1))
-                        .cornerRadius(10)
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(Color("AppPrimaryColor").opacity(0.1))
+                        )
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 8)
@@ -341,29 +346,6 @@ struct EventsView: View {
     }
 }
 
-// Filter tag component
-struct FilterTag: View {
-    let text: String
-    let onRemove: () -> Void
-    
-    var body: some View {
-        HStack(spacing: 4) {
-            Text(text)
-                .font(.caption)
-            
-            Button(action: onRemove) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.caption)
-            }
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
-        .background(Color("AppPrimaryColor").opacity(0.1))
-        .foregroundColor(Color("AppPrimaryColor"))
-        .cornerRadius(12)
-    }
-}
-
 // Event List Row Component - Include it in this file to fix the "Cannot find 'EventListRow' in scope" error
 struct EventListRow: View {
     let event: EventPreview
@@ -373,57 +355,66 @@ struct EventListRow: View {
             // Date component
             VStack(spacing: 2) {
                 Text(formatDay(event.date))
-                    .font(.caption)
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.secondary)
                 
                 Text(formatDayNumber(event.date))
-                    .font(.title)
-                    .fontWeight(.bold)
+                    .font(.system(size: 22, weight: .bold))
                     .foregroundColor(Color("AppPrimaryColor"))
                 
                 Text(formatMonth(event.date))
-                    .font(.caption)
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.secondary)
             }
             .frame(width: 60)
             .padding(.vertical, 8)
-            .background(Color("AppPrimaryColor").opacity(0.1))
-            .cornerRadius(8)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color("AppPrimaryColor").opacity(0.1))
+            )
             
             // Event info
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(event.title)
-                    .font(.headline)
+                    .font(.system(size: 17, weight: .semibold))
                     .lineLimit(1)
                 
                 HStack {
-                    Image(systemName: "clock")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    Image(systemName: "clock.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color("AppPrimaryColor").opacity(0.7))
                     
                     Text(formatTime(event.date))
-                        .font(.subheadline)
+                        .font(.system(size: 14))
                         .foregroundColor(.secondary)
                 }
                 
                 HStack {
-                    Image(systemName: "location")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color("AppPrimaryColor").opacity(0.7))
                     
                     Text(event.location)
-                        .font(.subheadline)
+                        .font(.system(size: 14))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
             }
             
             Spacer()
+            
+            // Chevron
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Color(.systemGray4))
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+        )
     }
     
     private func formatDayNumber(_ date: Date) -> String {
