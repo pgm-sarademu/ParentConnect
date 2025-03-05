@@ -4,6 +4,7 @@ struct EventFilters {
     var priceFilter: PriceFilter = .all
     var ageFilter: String = "All Ages"
     var selectedDateRange: DateRangeFilter = .all
+    var distanceFilter: DistanceFilter = .any
     
     enum PriceFilter: String, CaseIterable {
         case all = "All"
@@ -16,6 +17,24 @@ struct EventFilters {
         case today = "Today"
         case thisWeek = "This Week"
         case thisMonth = "This Month"
+    }
+    
+    enum DistanceFilter: String, CaseIterable {
+        case any = "Any Distance"
+        case nearby = "Nearby (<2 miles)"
+        case walking = "Walking (0.5 miles)"
+        case driving = "Short Drive (5 miles)"
+        case local = "Local Area (10 miles)"
+        
+        var distance: Double {
+            switch self {
+            case .any: return Double.infinity
+            case .nearby: return 2.0
+            case .walking: return 0.5
+            case .driving: return 5.0
+            case .local: return 10.0
+            }
+        }
     }
 }
 
@@ -41,6 +60,15 @@ struct EventFiltersView: View {
                         ForEach(EventFilters.PriceFilter.allCases, id: \.self) { option in
                             Text(option.rawValue).tag(option)
                         }
+                
+                Section(header: Text("Location")) {
+                    Picker("Distance", selection: $tempFilters.distanceFilter) {
+                        ForEach(EventFilters.DistanceFilter.allCases, id: \.self) { option in
+                            Text(option.rawValue).tag(option)
+                        }
+                    }
+                    .pickerStyle(WheelPickerStyle())
+                }
                 
                 // Clear all filters button
                 Section {

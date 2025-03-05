@@ -83,6 +83,17 @@ struct EventsView: View {
             }
         }
         
+        // Apply distance filter
+        if filters.distanceFilter != .any {
+            // In a real app, you would calculate actual distances
+            // For demo, we'll use ID value to simulate
+            filtered = filtered.filter { event in
+                let idValue = Int(event.id) ?? 0
+                let mockDistance = Double(idValue) * 0.5 // Mock distance in miles
+                return mockDistance <= filters.distanceFilter.distance
+            }
+        }
+        
         return filtered.sorted { $0.date < $1.date }
     }
     
@@ -133,6 +144,12 @@ struct EventsView: View {
                             if filters.selectedDateRange != .all {
                                 FilterTag(text: filters.selectedDateRange.rawValue) {
                                     filters.selectedDateRange = .all
+                                }
+                            }
+                            
+                            if filters.distanceFilter != .any {
+                                FilterTag(text: filters.distanceFilter.rawValue) {
+                                    filters.distanceFilter = .any
                                 }
                             }
                         }
@@ -213,6 +230,34 @@ struct EventsView: View {
                     }
                     .listStyle(PlainListStyle())
                 }
+                
+                // Add nearby events button
+                VStack {
+                    Divider()
+                        .padding(.vertical, 8)
+                    
+                    NavigationLink(destination: NearbyEventsView()) {
+                        HStack {
+                            Image(systemName: "mappin.and.ellipse")
+                                .foregroundColor(Color("AppPrimaryColor"))
+                            
+                            Text("Find Events Near Me")
+                                .font(.headline)
+                                .foregroundColor(Color("AppPrimaryColor"))
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(Color("AppPrimaryColor"))
+                        }
+                        .padding()
+                        .background(Color("AppPrimaryColor").opacity(0.1))
+                        .cornerRadius(10)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                }
             }
             .navigationTitle("Events")
             .searchable(text: $searchText, prompt: "Search events")
@@ -243,6 +288,7 @@ struct EventsView: View {
         if filters.priceFilter != .all { count += 1 }
         if filters.ageFilter != "All Ages" { count += 1 }
         if filters.selectedDateRange != .all { count += 1 }
+        if filters.distanceFilter != .any { count += 1 }
         return count
     }
     
