@@ -7,44 +7,44 @@ class ConnectionManager {
     
     private init() {}
     
-    // Stores a record of who is attending which events
+    // Stores a record of who is participating in which events
     // In a real app, this would be in Core Data
-    func markAttending(eventId: String, userId: String) {
-        // Get existing attendees for this event
-        var eventAttendees = UserDefaults.standard.dictionary(forKey: "EventAttendees") as? [String: [String]] ?? [:]
+    func markParticipating(eventId: String, userId: String) {
+        // Get existing participants for this event
+        var eventParticipants = UserDefaults.standard.dictionary(forKey: "EventParticipants") as? [String: [String]] ?? [:]
         
-        // Add this user to the attendees list
-        var attendees = eventAttendees[eventId] ?? []
-        if !attendees.contains(userId) {
-            attendees.append(userId)
+        // Add this user to the participants list
+        var participants = eventParticipants[eventId] ?? []
+        if !participants.contains(userId) {
+            participants.append(userId)
         }
-        eventAttendees[eventId] = attendees
+        eventParticipants[eventId] = participants
         
         // Save back to UserDefaults
-        UserDefaults.standard.set(eventAttendees, forKey: "EventAttendees")
+        UserDefaults.standard.set(eventParticipants, forKey: "EventParticipants")
     }
     
-    // Removes a user from attending an event
-    func unmarkAttending(eventId: String, userId: String) {
-        var eventAttendees = UserDefaults.standard.dictionary(forKey: "EventAttendees") as? [String: [String]] ?? [:]
+    // Removes a user from participating in an event
+    func unmarkParticipating(eventId: String, userId: String) {
+        var eventParticipants = UserDefaults.standard.dictionary(forKey: "EventParticipants") as? [String: [String]] ?? [:]
         
-        var attendees = eventAttendees[eventId] ?? []
-        attendees.removeAll { $0 == userId }
+        var participants = eventParticipants[eventId] ?? []
+        participants.removeAll { $0 == userId }
         
-        eventAttendees[eventId] = attendees
-        UserDefaults.standard.set(eventAttendees, forKey: "EventAttendees")
+        eventParticipants[eventId] = participants
+        UserDefaults.standard.set(eventParticipants, forKey: "EventParticipants")
     }
     
-    // Gets all user IDs attending a specific event
-    func getAttendees(eventId: String) -> [String] {
-        let eventAttendees = UserDefaults.standard.dictionary(forKey: "EventAttendees") as? [String: [String]] ?? [:]
-        return eventAttendees[eventId] ?? []
+    // Gets all user IDs participating in a specific event
+    func getParticipants(eventId: String) -> [String] {
+        let eventParticipants = UserDefaults.standard.dictionary(forKey: "EventParticipants") as? [String: [String]] ?? [:]
+        return eventParticipants[eventId] ?? []
     }
     
-    // Checks if a user is attending an event
-    func isAttending(eventId: String, userId: String) -> Bool {
-        let attendees = getAttendees(eventId: eventId)
-        return attendees.contains(userId)
+    // Checks if a user is participating in an event
+    func isParticipating(eventId: String, userId: String) -> Bool {
+        let participants = getParticipants(eventId: eventId)
+        return participants.contains(userId)
     }
     
     // Create a connection request between two users

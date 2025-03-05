@@ -1,7 +1,7 @@
 import SwiftUI
 import CoreData
 
-struct EventAttendeesView: View {
+struct EventParticipantView: View {
     let eventId: String
     @State private var attendees: [MockAttendee] = []
     @State private var isLoading = true
@@ -11,7 +11,7 @@ struct EventAttendeesView: View {
     var body: some View {
         VStack {
             if isLoading {
-                ProgressView("Loading attendees...")
+                ProgressView("Loading participants...")
             } else if attendees.isEmpty {
                 VStack(spacing: 20) {
                     Image(systemName: "person.crop.circle.badge.xmark")
@@ -20,7 +20,7 @@ struct EventAttendeesView: View {
                         .frame(width: 70, height: 70)
                         .foregroundColor(Color(.systemGray4))
                     
-                    Text("No attendees yet")
+                    Text("No participants yet")
                         .font(.headline)
                     
                     Text("Be the first to attend this event!")
@@ -84,7 +84,7 @@ struct EventAttendeesView: View {
                 }
             }
         }
-        .navigationTitle("Attendees")
+        .navigationTitle("Participants")
         .onAppear(perform: loadAttendees)
         .alert(isPresented: $showingConnectConfirmation) {
             Alert(

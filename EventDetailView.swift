@@ -129,13 +129,13 @@ struct EnhancedEventDetailView: View {
                         }
                     }
                     
-                    // View attendees button
+                    // View participants button
                     Button(action: {
                         showingAttendees = true
                     }) {
                         HStack {
                             Image(systemName: "person.3.fill")
-                            Text("View Attendees")
+                            Text("View Participants")
                             Spacer()
                             Image(systemName: "chevron.right")
                                 .font(.caption)
@@ -197,7 +197,7 @@ struct EnhancedEventDetailView: View {
         .onAppear(perform: loadEventDetails)
         .sheet(isPresented: $showingAttendees) {
             NavigationView {
-                EventAttendeesView(eventId: event.id)
+                EventParticipantView(eventId: event.id)
             }
         }
     }
