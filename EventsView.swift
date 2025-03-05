@@ -6,6 +6,7 @@ struct EventsView: View {
     @State private var events: [EventPreview] = []
     @State private var searchText = ""
     @State private var selectedFilter: String? = "All"
+    @State private var showingAddEventSheet = false
     
     let filters = ["All", "Today", "This Week", "Kid-Friendly", "Free"]
     
@@ -101,12 +102,28 @@ struct EventsView: View {
                         }
                         .padding(.top, 10)
                         
+                        Button(action: {
+                            showingAddEventSheet = true
+                        }) {
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                Text("Create an Event")
+                            }
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(Color("AppPrimaryColor"))
+                            .cornerRadius(20)
+                        }
+                        .padding(.top, 10)
+                        
                         Spacer()
                     }
                 } else {
                     List {
                         ForEach(filteredEvents) { event in
-                            NavigationLink(destination: EventDetailView(event: event)) {
+                            NavigationLink(destination: EnhancedEventDetailView(event: event)) {
                                 EventListRow(event: event)
                             }
                             .listRowSeparator(.hidden)
@@ -124,12 +141,15 @@ struct EventsView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
-                        // Action to add new event
+                        showingAddEventSheet = true
                     }) {
                         Image(systemName: "plus.circle.fill")
                             .foregroundColor(Color("AppPrimaryColor"))
                     }
                 }
+            }
+            .sheet(isPresented: $showingAddEventSheet) {
+                EventForm()
             }
         }
     }
