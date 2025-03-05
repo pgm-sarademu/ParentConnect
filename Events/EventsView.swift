@@ -3,11 +3,15 @@ import CoreData
 import MapKit
 
 struct EventsView: View {
+    @EnvironmentObject var locationManager: LocationManager
     @State private var events: [EventPreview] = []
     @State private var searchText = ""
     @State private var showingAddEventSheet = false
     @State private var showingFilters = false
     @State private var filters = EventFilters()
+    
+    // Mock user data for ordering by age relevance
+    @State private var userChildAges = [4, 6]  // Would come from user profile in a real app
     
     var filteredEvents: [EventPreview] {
         var filtered = events
@@ -83,18 +87,36 @@ struct EventsView: View {
             }
         }
         
-        // Apply distance filter
+        // Apply distance filter based on selected location
         if filters.distanceFilter != .any {
-            // In a real app, you would calculate actual distances
-            // For demo, we'll use ID value to simulate
-            filtered = filtered.filter { event in
-                let idValue = Int(event.id) ?? 0
-                let mockDistance = Double(idValue) * 0.5 // Mock distance in miles
-                return mockDistance <= filters.distanceFilter.distance
+            // Get the reference location (either current or custom)
+            let referenceLocation: CLLocation?
+            
+            switch filters.customLocation {
+            case .currentLocation:
+                referenceLocation = locationManager.location
+            case .customLocation(let location, _):
+                referenceLocation = location
+            }
+            
+            if let referenceLocation = referenceLocation {
+                filtered = filtered.filter { event in
+                    // In a real app, you would use actual event coordinates
+                    // For demo, simulate with mock coordinates
+                    let eventCoord = getMockCoordinates(for: event)
+                    let eventLocation = CLLocation(latitude: eventCoord.latitude, longitude: eventCoord.longitude)
+                    
+                    // Calculate distance in miles
+                    let distanceInMeters = referenceLocation.distance(from: eventLocation)
+                    let distanceInMiles = distanceInMeters * 0.000621371 // Convert meters to miles
+                    
+                    return distanceInMiles <= filters.distanceFilter.distance
+                }
             }
         }
         
-        return filtered.sorted { $0.date < $1.date }
+        // Sort by location proximity and age relevance (instead of just date)
+        return sortByRelevance(events: filtered)
     }
     
     var body: some View {
@@ -153,6 +175,12 @@ struct EventsView: View {
                                     filters.distanceFilter = .any
                                 }
                             }
+                            
+                            if case let .customLocation(_, name) = filters.customLocation {
+                                FilterTag(text: "📍 \(name)") {
+                                    filters.customLocation = .currentLocation
+                                }
+                            }
                         }
                     }
                     
@@ -182,11 +210,19 @@ struct EventsView: View {
                         Text("No events found")
                             .font(.headline)
                         
-                        Text("Try changing your filters or check back later")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
+                        if case let .customLocation(_, name) = filters.customLocation {
+                            Text("No events found in \(name)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        } else {
+                            Text("Try changing your filters or check back later")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
                         
                         Button(action: {
                             resetFilters()
@@ -220,10 +256,35 @@ struct EventsView: View {
                         Spacer()
                     }
                 } else {
+                    // Display info about sorting at the top
+                    HStack {
+                        Text("Events sorted by location and child age relevance")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 2)
+                    
+                    // Display location header if using custom location
+                    if case let .customLocation(_, name) = filters.customLocation {
+                        HStack {
+                            Image(systemName: "mappin.circle.fill")
+                                .foregroundColor(Color("AppPrimaryColor"))
+                            Text("Showing events near \(name)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 4)
+                    }
+                    
                     List {
                         ForEach(filteredEvents) { event in
                             NavigationLink(destination: EnhancedEventDetailView(event: event)) {
-                                EventListRow(event: event)
+                                // Use the enhanced row without star indicators
+                                EventListRowSimplified(event: event)
                             }
                             .listRowSeparator(.hidden)
                             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
@@ -231,43 +292,12 @@ struct EventsView: View {
                     }
                     .listStyle(PlainListStyle())
                 }
-                
-                // Add nearby events button
-                VStack {
-                    Divider()
-                        .padding(.vertical, 8)
-                    
-                    NavigationLink(destination: NearbyEventsView()) {
-                        HStack {
-                            Image(systemName: "mappin.and.ellipse")
-                                .font(.system(size: 18))
-                                .foregroundColor(Color("AppPrimaryColor"))
-                            
-                            Text("Find Events Near Me")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(Color("AppPrimaryColor"))
-                            
-                            Spacer()
-                            
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Color("AppPrimaryColor"))
-                        }
-                        .padding(.vertical, 14)
-                        .padding(.horizontal, 16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14)
-                                .fill(Color("AppPrimaryColor").opacity(0.1))
-                        )
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
-                }
             }
             .navigationTitle("Events")
             .searchable(text: $searchText, prompt: "Search events")
             .onAppear {
                 loadMockEvents()
+                loadUserProfile()
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -294,11 +324,134 @@ struct EventsView: View {
         if filters.ageFilter != "All Ages" { count += 1 }
         if filters.selectedDateRange != .all { count += 1 }
         if filters.distanceFilter != .any { count += 1 }
+        if case .customLocation = filters.customLocation { count += 1 }
         return count
     }
     
     private func resetFilters() {
         filters = EventFilters()
+    }
+    
+    // Load user profile data
+    private func loadUserProfile() {
+        // In a real app, this would come from Core Data or user preferences
+        // For demo, we'll use mock data
+        userChildAges = [4, 6]
+    }
+    
+    // Calculate a relevance score for each event
+    private func calculateRelevanceScore(for event: EventPreview) -> Double {
+        var score = 0.0
+        
+        // 1. Location proximity (0-100 points)
+        let distance = getDistanceToEvent(event)
+        
+        // Closer events get higher scores
+        if distance < 1.0 {
+            score += 100 // Very close
+        } else if distance < 3.0 {
+            score += 80
+        } else if distance < 5.0 {
+            score += 60
+        } else if distance < 10.0 {
+            score += 40
+        } else if distance < 20.0 {
+            score += 20
+        }
+        
+        // 2. Age relevance (0-100 points)
+        // In a real app, parse age ranges from the event
+        // For demo, use the event ID to simulate age ranges
+        let idNumber = Int(event.id) ?? 0
+        let eventAgeMin = (idNumber % 15) + 1 // 1-15 years
+        let eventAgeMax = eventAgeMin + 3
+        
+        // Check how well user's children's ages match the event's age range
+        for childAge in userChildAges {
+            if childAge >= eventAgeMin && childAge <= eventAgeMax {
+                // Perfect age match
+                score += 100 / Double(userChildAges.count)
+            } else if abs(childAge - eventAgeMin) <= 1 || abs(childAge - eventAgeMax) <= 1 {
+                // Close age match (within 1 year)
+                score += 60 / Double(userChildAges.count)
+            } else if abs(childAge - eventAgeMin) <= 2 || abs(childAge - eventAgeMax) <= 2 {
+                // Somewhat close (within 2 years)
+                score += 30 / Double(userChildAges.count)
+            }
+        }
+        
+        // 3. Date relevance (0-50 points)
+        // Events happening soon get higher scores
+        let daysUntilEvent = daysBetween(Date(), event.date)
+        if daysUntilEvent == 0 {
+            score += 50 // Today
+        } else if daysUntilEvent <= 2 {
+            score += 40 // Next couple days
+        } else if daysUntilEvent <= 7 {
+            score += 30 // This week
+        } else if daysUntilEvent <= 14 {
+            score += 20 // Next 2 weeks
+        } else if daysUntilEvent <= 30 {
+            score += 10 // This month
+        }
+        
+        return score
+    }
+    
+    // Sort events by their relevance score
+    private func sortByRelevance(events: [EventPreview]) -> [EventPreview] {
+        return events.sorted { (event1, event2) -> Bool in
+            let score1 = calculateRelevanceScore(for: event1)
+            let score2 = calculateRelevanceScore(for: event2)
+            return score1 > score2
+        }
+    }
+    
+    // Calculate days between two dates
+    private func daysBetween(_ start: Date, _ end: Date) -> Int {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day], from: start, to: end)
+        return components.day ?? 0
+    }
+    
+    // Get distance to event
+    private func getDistanceToEvent(_ event: EventPreview) -> Double {
+        guard let userLocation = locationManager.location else {
+            return 100.0 // Default large distance if location unknown
+        }
+        
+        // In a real app, you would use real event coordinates
+        // For demo, create mock coordinates
+        let coordinates = getMockCoordinates(for: event)
+        let eventLocation = CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude)
+        
+        // Calculate distance in miles
+        let distanceInMeters = userLocation.distance(from: eventLocation)
+        return distanceInMeters * 0.000621371 // Convert meters to miles
+    }
+    
+    // Create mock coordinates for distance calculations
+    private func getMockCoordinates(for event: EventPreview) -> CLLocationCoordinate2D {
+        // In a real app, each event would have its own coordinates
+        // For this demo, we'll just simulate different coordinates based on the event ID
+        
+        // Base coordinates - roughly around user's location
+        let baseLatitude = locationManager.location?.coordinate.latitude ?? 37.7749
+        let baseLongitude = locationManager.location?.coordinate.longitude ?? -122.4194
+        
+        // Create a deterministic "random" offset based on the event ID
+        let idHash = event.id.hash
+        let latitudeOffset = Double(abs(idHash % 100)) * 0.0003
+        let longitudeOffset = Double(abs((idHash / 100) % 100)) * 0.0003
+        
+        // Use XOR to determine direction
+        let latSign = (idHash & 1) == 0 ? 1.0 : -1.0
+        let lonSign = (idHash & 2) == 0 ? 1.0 : -1.0
+        
+        return CLLocationCoordinate2D(
+            latitude: baseLatitude + (latitudeOffset * latSign),
+            longitude: baseLongitude + (longitudeOffset * lonSign)
+        )
     }
     
     private func loadMockEvents() {
@@ -341,13 +494,49 @@ struct EventsView: View {
                 title: "Parent Support Group",
                 date: calendar.date(byAdding: .day, value: 7, to: currentDate) ?? currentDate,
                 location: "Family Center"
+            ),
+            EventPreview(
+                id: "7",
+                title: "Toddler Gymnastics",
+                date: calendar.date(byAdding: .day, value: 2, to: currentDate) ?? currentDate,
+                location: "Kids Gym Center"
+            ),
+            EventPreview(
+                id: "8",
+                title: "Science Workshop for Kids",
+                date: calendar.date(byAdding: .day, value: 6, to: currentDate) ?? currentDate,
+                location: "Science Museum"
+            ),
+            EventPreview(
+                id: "9",
+                title: "Outdoor Adventure Day",
+                date: calendar.date(byAdding: .day, value: 9, to: currentDate) ?? currentDate,
+                location: "Nature Reserve"
+            ),
+            EventPreview(
+                id: "10",
+                title: "Music Class for Kids",
+                date: calendar.date(byAdding: .day, value: 3, to: currentDate) ?? currentDate,
+                location: "Music School"
+            ),
+            EventPreview(
+                id: "11",
+                title: "Coding for Teens",
+                date: calendar.date(byAdding: .day, value: 4, to: currentDate) ?? currentDate,
+                location: "Tech Learning Center"
+            ),
+            EventPreview(
+                id: "12",
+                title: "Puppet Show",
+                date: calendar.date(byAdding: .day, value: 1, to: currentDate) ?? currentDate,
+                location: "Children's Theater"
             )
         ]
     }
 }
 
-// Event List Row Component - Include it in this file to fix the "Cannot find 'EventListRow' in scope" error
-struct EventListRow: View {
+// Simplified Event List Row Component without stars or relevance indicators
+struct EventListRowSimplified: View {
     let event: EventPreview
     
     var body: some View {
@@ -398,6 +587,19 @@ struct EventListRow: View {
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
+                }
+                
+                // Age recommendation - simulated based on ID for demo
+                // In a real app, this would come from event data
+                HStack {
+                    Image(systemName: "person.2.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color("AppPrimaryColor").opacity(0.7))
+                    
+                    let minAge = (Int(event.id) ?? 0) % 15 + 1
+                    Text("Ages \(minAge)-\(minAge+3)")
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
                 }
             }
             
