@@ -12,6 +12,7 @@ struct EventForm: View {
     @State private var date = Date()
     @State private var isPaid = false
     @State private var price: String = ""
+    @State private var ageRange = ""
     @State private var privacyOption = 0 // 0=Public, 1=Friends, 2=Private
     
     // Error handling
@@ -25,6 +26,8 @@ struct EventForm: View {
                     TextField("Event Title", text: $title)
                     TextField("Location", text: $location)
                     DatePicker("Date & Time", selection: $date)
+                    TextField("Age Range (e.g., 3-5 years)", text: $ageRange)
+                        .keyboardType(.default)
                 }
                 
                 Section(header: Text("Description")) {
@@ -100,6 +103,7 @@ struct EventForm: View {
         newEvent.location = location
         newEvent.eventDescription = description
         newEvent.date = date
+        newEvent.ageRange = ageRange
         
         // Handle pricing
         if isPaid {

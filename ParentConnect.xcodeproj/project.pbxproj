@@ -15,11 +15,7 @@
 		56AB348F2D763E23006A471B /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB348E2D763E23006A471B /* NotificationManager.swift */; };
 		56AB34912D763E49006A471B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34902D763E49006A471B /* AppDelegate.swift */; };
 		56AB34972D7769A6006A471B /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34962D7769A6006A471B /* LocationManager.swift */; };
-		56AB34A12D77931E006A471B /* EventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34A02D77931E006A471B /* EventsView.swift */; };
 		56AB34A32D77969C006A471B /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34A22D77969C006A471B /* Models.swift */; };
-		56AB34F72D782733006A471B /* EventForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34F62D782733006A471B /* EventForm.swift */; };
-		56AB34FF2D782D8F006A471B /* EventParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34FE2D782D8F006A471B /* EventParticipantView.swift */; };
-		56AB35012D782DBF006A471B /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB35002D782DBF006A471B /* EventDetailView.swift */; };
 		56AB35032D782E05006A471B /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB35022D782E05006A471B /* ConnectionManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -49,11 +45,7 @@
 		56AB348E2D763E23006A471B /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		56AB34902D763E49006A471B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		56AB34962D7769A6006A471B /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
-		56AB34A02D77931E006A471B /* EventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsView.swift; sourceTree = "<group>"; };
 		56AB34A22D77969C006A471B /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
-		56AB34F62D782733006A471B /* EventForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventForm.swift; sourceTree = "<group>"; };
-		56AB34FE2D782D8F006A471B /* EventParticipantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventParticipantView.swift; sourceTree = "<group>"; };
-		56AB35002D782DBF006A471B /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 		56AB35022D782E05006A471B /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
 		56C328CE2D723EAB005E6E8C /* ParentConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ParentConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		56C328E52D723EAD005E6E8C /* ParentConnectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ParentConnectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -71,6 +63,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		56AB35042D78328C006A471B /* Events */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Events;
+			sourceTree = "<group>";
+		};
 		56C328D02D723EAB005E6E8C /* ParentConnect */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -120,13 +117,10 @@
 			isa = PBXGroup;
 			children = (
 				56AB35022D782E05006A471B /* ConnectionManager.swift */,
-				56AB35002D782DBF006A471B /* EventDetailView.swift */,
-				56AB34FE2D782D8F006A471B /* EventParticipantView.swift */,
-				56AB34F62D782733006A471B /* EventForm.swift */,
 				56AB34332D743AE7006A471B /* HomeView.swift */,
 				56AB34352D743CF6006A471B /* MessageView.swift */,
 				56AB34372D743D38006A471B /* ChatView.swift */,
-				56AB34A02D77931E006A471B /* EventsView.swift */,
+				56AB35042D78328C006A471B /* Events */,
 				56AB34392D743FC0006A471B /* ActivitiesView.swift */,
 				56AB34542D75D11B006A471B /* ProfileView.swift */,
 				56AB34A22D77969C006A471B /* Models.swift */,
@@ -166,6 +160,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				56AB35042D78328C006A471B /* Events */,
 				56C328D02D723EAB005E6E8C /* ParentConnect */,
 			);
 			name = ParentConnect;
@@ -294,18 +289,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				56AB34A12D77931E006A471B /* EventsView.swift in Sources */,
 				56AB34362D743CF6006A471B /* MessageView.swift in Sources */,
 				56AB34912D763E49006A471B /* AppDelegate.swift in Sources */,
-				56AB34F72D782733006A471B /* EventForm.swift in Sources */,
 				56AB34552D75D11B006A471B /* ProfileView.swift in Sources */,
-				56AB35012D782DBF006A471B /* EventDetailView.swift in Sources */,
 				56AB34382D743D38006A471B /* ChatView.swift in Sources */,
 				56AB34342D743AE7006A471B /* HomeView.swift in Sources */,
 				56AB343A2D743FC0006A471B /* ActivitiesView.swift in Sources */,
 				56AB35032D782E05006A471B /* ConnectionManager.swift in Sources */,
 				56AB348F2D763E23006A471B /* NotificationManager.swift in Sources */,
-				56AB34FF2D782D8F006A471B /* EventParticipantView.swift in Sources */,
 				56AB34972D7769A6006A471B /* LocationManager.swift in Sources */,
 				56AB34A32D77969C006A471B /* Models.swift in Sources */,
 			);
