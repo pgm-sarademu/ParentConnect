@@ -1,10 +1,13 @@
 import SwiftUI
+import MapKit
+import CoreLocation
 
 struct EventFilters {
     var priceFilter: PriceFilter = .all
     var ageFilter: String = "All Ages"
     var selectedDateRange: DateRangeFilter = .all
     var distanceFilter: DistanceFilter = .any
+    var customLocation: LocationOption = .currentLocation
     
     enum PriceFilter: String, CaseIterable {
         case all = "All"
@@ -33,6 +36,29 @@ struct EventFilters {
             case .walking: return 0.5
             case .driving: return 5.0
             case .local: return 10.0
+            }
+        }
+    }
+    
+    enum LocationOption: Equatable {
+        case currentLocation
+        case customLocation(CLLocation, String)
+        
+        var title: String {
+            switch self {
+            case .currentLocation:
+                return "Current Location"
+            case .customLocation(_, let name):
+                return name
+            }
+        }
+        
+        var coordinate: CLLocationCoordinate2D? {
+            switch self {
+            case .currentLocation:
+                return nil // Will use device's location
+            case .customLocation(let location, _):
+                return location.coordinate
             }
         }
     }
@@ -126,6 +152,10 @@ struct EventFiltersView: View {
     @Binding var filters: EventFilters
     @Binding var isPresented: Bool
     @State private var tempFilters: EventFilters
+    @State private var showingLocationSearch = false
+    @State private var searchQuery = ""
+    @State private var searchResults: [LocationSearchResult] = []
+    @EnvironmentObject var locationManager: LocationManager
     
     // Common age ranges for kids' activities
     let ageRanges = ["All Ages", "0-2 years", "3-5 years", "6-8 years", "9-12 years", "Teenagers"]
@@ -158,6 +188,40 @@ struct EventFiltersView: View {
                                 )
                             }
                         }
+                        .padding(.horizontal)
+                    }
+                }
+                .padding(.vertical)
+                .background(Color(.systemBackground))
+                
+                Divider()
+                
+                // Location filter section (NEW)
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Location")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal)
+                    
+                    Button(action: {
+                        showingLocationSearch = true
+                    }) {
+                        HStack {
+                            Image(systemName: "location.circle.fill")
+                                .foregroundColor(Color("AppPrimaryColor"))
+                            
+                            Text(tempFilters.customLocation.title)
+                                .foregroundColor(.primary)
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                                .font(.caption)
+                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
                         .padding(.horizontal)
                     }
                 }
@@ -305,6 +369,14 @@ struct EventFiltersView: View {
                 }
             )
             .background(Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all))
+            .sheet(isPresented: $showingLocationSearch) {
+                LocationSearchView(
+                    customLocation: $tempFilters.customLocation,
+                    searchQuery: $searchQuery,
+                    searchResults: $searchResults,
+                    locationManager: locationManager
+                )
+            }
         }
     }
     
@@ -315,6 +387,7 @@ struct EventFiltersView: View {
         if tempFilters.ageFilter != "All Ages" { count += 1 }
         if tempFilters.selectedDateRange != .all { count += 1 }
         if tempFilters.distanceFilter != .any { count += 1 }
+        if case .customLocation = tempFilters.customLocation { count += 1 }
         return count
     }
     
@@ -328,5 +401,134 @@ struct EventFiltersView: View {
         case .paid:
             return "dollarsign.circle"
         }
+    }
+}
+
+struct LocationSearchResult: Identifiable {
+    let id = UUID()
+    let name: String
+    let address: String
+    let coordinate: CLLocationCoordinate2D
+}
+
+struct LocationSearchView: View {
+    @Environment(\.presentationMode) var presentationMode
+    @Binding var customLocation: EventFilters.LocationOption
+    @Binding var searchQuery: String
+    @Binding var searchResults: [LocationSearchResult]
+    let locationManager: LocationManager
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                // Use current location option
+                Button(action: {
+                    customLocation = .currentLocation
+                    presentationMode.wrappedValue.dismiss()
+                }) {
+                    HStack {
+                        Image(systemName: "location.circle.fill")
+                            .foregroundColor(Color("AppPrimaryColor"))
+                        Text("Use Current Location")
+                            .foregroundColor(.primary)
+                        Spacer()
+                        if case .currentLocation = customLocation {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(Color("AppPrimaryColor"))
+                        }
+                    }
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+                }
+                .padding(.top)
+                
+                // Search bar
+                TextField("Search for a city or location", text: $searchQuery)
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+                    .onChange(of: searchQuery) { oldValue, newValue in
+                        if !newValue.isEmpty && newValue.count > 2 {
+                            searchLocation(query: newValue)
+                        }
+                    }
+                
+                // Results list
+                List {
+                    ForEach(searchResults) { result in
+                        Button(action: {
+                            selectLocation(result)
+                        }) {
+                            VStack(alignment: .leading) {
+                                Text(result.name)
+                                    .font(.headline)
+                                Text(result.address)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+                .listStyle(PlainListStyle())
+            }
+            .navigationTitle("Choose Location")
+            .navigationBarItems(trailing: Button("Cancel") {
+                presentationMode.wrappedValue.dismiss()
+            })
+        }
+    }
+    
+    private func searchLocation(query: String) {
+        let searchRequest = MKLocalSearch.Request()
+        searchRequest.naturalLanguageQuery = query
+        searchRequest.region = MKCoordinateRegion(
+            center: locationManager.location?.coordinate ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
+            span: MKCoordinateSpan(latitudeDelta: 1.0, longitudeDelta: 1.0)
+        )
+        
+        let search = MKLocalSearch(request: searchRequest)
+        search.start { response, error in
+            guard let response = response else {
+                if let error = error {
+                    print("Search error: \(error.localizedDescription)")
+                }
+                return
+            }
+            
+            searchResults = response.mapItems.map { item in
+                LocationSearchResult(
+                    name: item.name ?? "Unknown Location",
+                    address: parseAddress(from: item.placemark),
+                    coordinate: item.placemark.coordinate
+                )
+            }
+        }
+    }
+    
+    private func parseAddress(from placemark: MKPlacemark) -> String {
+        var addressComponents = [String]()
+        
+        if let city = placemark.locality {
+            addressComponents.append(city)
+        }
+        
+        if let state = placemark.administrativeArea {
+            addressComponents.append(state)
+        }
+        
+        if let country = placemark.country {
+            addressComponents.append(country)
+        }
+        
+        return addressComponents.joined(separator: ", ")
+    }
+    
+    private func selectLocation(_ result: LocationSearchResult) {
+        let location = CLLocation(latitude: result.coordinate.latitude, longitude: result.coordinate.longitude)
+        customLocation = .customLocation(location, "\(result.name), \(result.address)")
+        presentationMode.wrappedValue.dismiss()
     }
 }

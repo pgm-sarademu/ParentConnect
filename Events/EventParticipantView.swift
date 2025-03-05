@@ -7,9 +7,49 @@ struct EventParticipantView: View {
     @State private var isLoading = true
     @State private var showingConnectConfirmation = false
     @State private var selectedAttendee: MockAttendee?
+    @State private var hasParticipantLimit = false
+    @State private var maxChildCount = 0
+    @State private var currentChildCount = 0
     
     var body: some View {
         VStack {
+            // If there's a participant limit, show a capacity indicator
+            if hasParticipantLimit {
+                VStack(spacing: 5) {
+                    HStack {
+                        Text("Event Capacity")
+                            .font(.headline)
+                        Spacer()
+                        Text("\(currentChildCount)/\(maxChildCount) children")
+                            .font(.subheadline)
+                            .foregroundColor(currentChildCount >= maxChildCount ? .red : .secondary)
+                    }
+                    
+                    // Progress bar
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            Rectangle()
+                                .frame(width: geometry.size.width, height: 8)
+                                .opacity(0.2)
+                                .foregroundColor(Color("AppPrimaryColor"))
+                                .cornerRadius(4)
+                            
+                            Rectangle()
+                                .frame(width: min(CGFloat(currentChildCount) / CGFloat(maxChildCount) * geometry.size.width, geometry.size.width), height: 8)
+                                .foregroundColor(currentChildCount >= maxChildCount ? .red : Color("AppPrimaryColor"))
+                                .cornerRadius(4)
+                        }
+                    }
+                    .frame(height: 8)
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(10)
+                .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+                .padding(.horizontal)
+                .padding(.top, 10)
+            }
+            
             if isLoading {
                 ProgressView("Loading participants...")
             } else if attendees.isEmpty {
@@ -49,9 +89,20 @@ struct EventParticipantView: View {
                                     Text(attendee.name)
                                         .font(.headline)
                                     
-                                    Text(attendee.childrenInfo)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
+                                    HStack {
+                                        Text(attendee.childrenInfo)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                        
+                                        // Child count badge
+                                        Text("\(attendee.childCount)")
+                                            .font(.caption)
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(Color("AppPrimaryColor"))
+                                            .foregroundColor(.white)
+                                            .clipShape(Circle())
+                                    }
                                 }
                                 
                                 Spacer()
@@ -81,6 +132,23 @@ struct EventParticipantView: View {
                             .padding(.vertical, 8)
                         }
                     }
+                    
+                    // Summary section
+                    Section(header: Text("Summary")) {
+                        HStack {
+                            Text("Total parents:")
+                            Spacer()
+                            Text("\(attendees.count)")
+                                .fontWeight(.medium)
+                        }
+                        
+                        HStack {
+                            Text("Total children:")
+                            Spacer()
+                            Text("\(currentChildCount)")
+                                .fontWeight(.medium)
+                        }
+                    }
                 }
             }
         }
@@ -108,10 +176,24 @@ struct EventParticipantView: View {
             // Check event ID and load appropriate mock data
             // In a real app, you would fetch actual attendees for this event
             self.attendees = [
-                MockAttendee(id: "1", name: "Sarah Johnson", childrenInfo: "2 kids (4, 6)", isConnected: false),
-                MockAttendee(id: "2", name: "Mike Thompson", childrenInfo: "1 kid (3)", isConnected: true),
-                MockAttendee(id: "3", name: "Emma Roberts", childrenInfo: "3 kids (2, 5, 7)", isConnected: false)
+                MockAttendee(id: "1", name: "Sarah Johnson", childrenInfo: "2 kids (4, 6)", childCount: 2, isConnected: false),
+                MockAttendee(id: "2", name: "Mike Thompson", childrenInfo: "1 kid (3)", childCount: 1, isConnected: true),
+                MockAttendee(id: "3", name: "Emma Roberts", childrenInfo: "3 kids (2, 5, 7)", childCount: 3, isConnected: false),
+                MockAttendee(id: "4", name: "David Wilson", childrenInfo: "2 kids (4, 8)", childCount: 2, isConnected: false),
+                MockAttendee(id: "5", name: "Jennifer Brown", childrenInfo: "1 kid (5)", childCount: 1, isConnected: false)
             ]
+            
+            // Calculate total children count
+            self.currentChildCount = self.attendees.reduce(0) { $0 + $1.childCount }
+            
+            // For demo, determine if this event has a participant limit
+            let idValue = Int(eventId) ?? 0
+            self.hasParticipantLimit = idValue % 3 == 0 // Every third event has a limit
+            
+            if self.hasParticipantLimit {
+                self.maxChildCount = 15 // Demo value
+            }
+            
             isLoading = false
         }
     }
@@ -138,5 +220,6 @@ struct MockAttendee: Identifiable {
     let id: String
     let name: String
     let childrenInfo: String
+    let childCount: Int
     var isConnected: Bool
 }

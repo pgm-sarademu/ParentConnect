@@ -15,6 +15,11 @@ struct AddEventView: View {
     @State private var ageRange = ""
     @State private var privacyOption = 0 // 0=Public, 1=Friends, 2=Private
     
+    // Participant limits
+    @State private var hasParticipantLimit = false
+    @State private var maxChildrenCount = 10
+    @State private var limitDescription = ""
+    
     // Error handling
     @State private var showingAlert = false
     @State private var alertMessage = ""
@@ -42,6 +47,21 @@ struct AddEventView: View {
                         Text("Private (Invite Only)").tag(2)
                     }
                     .pickerStyle(SegmentedPickerStyle())
+                }
+                
+                Section(header: Text("Participant Limits")) {
+                    Toggle("Limit number of participants", isOn: $hasParticipantLimit)
+                    
+                    if hasParticipantLimit {
+                        Stepper("Maximum number of children: \(maxChildrenCount)", value: $maxChildrenCount, in: 1...100)
+                        
+                        Text("This will limit the event to a maximum of \(maxChildrenCount) children total, regardless of how many parents attend.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        TextField("Additional limit notes (optional)", text: $limitDescription)
+                            .font(.subheadline)
+                    }
                 }
                 
                 Section(header: Text("Pricing")) {
@@ -105,6 +125,16 @@ struct AddEventView: View {
         newEvent.date = date
         newEvent.ageRange = ageRange
         
+        // Add participant limits
+        if hasParticipantLimit {
+            newEvent.capacity = Int32(maxChildrenCount)
+            newEvent.spotsRemaining = Int32(maxChildrenCount)
+        } else {
+            // Use -1 to indicate no limit
+            newEvent.capacity = -1
+            newEvent.spotsRemaining = -1
+        }
+        
         // Handle pricing
         if isPaid {
             newEvent.isPaid = date // Using as a boolean placeholder since we already have this field
@@ -118,6 +148,14 @@ struct AddEventView: View {
         var updatedSettings = privacySettings
         updatedSettings[newEvent.id!] = privacyOption
         UserDefaults.standard.set(updatedSettings, forKey: "EventPrivacySettings")
+        
+        // Store participant limit description if available
+        if hasParticipantLimit && !limitDescription.isEmpty {
+            let limitDescriptions = UserDefaults.standard.dictionary(forKey: "EventLimitDescriptions") as? [String: String] ?? [:]
+            var updatedLimitDescriptions = limitDescriptions
+            updatedLimitDescriptions[newEvent.id!] = limitDescription
+            UserDefaults.standard.set(updatedLimitDescriptions, forKey: "EventLimitDescriptions")
+        }
         
         // Save to Core Data
         do {

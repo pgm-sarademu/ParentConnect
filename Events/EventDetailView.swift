@@ -10,6 +10,14 @@ struct EnhancedEventDetailView: View {
     @State private var price: String = ""
     @State private var privacyLevel = "Public"
     
+    // Participant limit states
+    @State private var hasParticipantLimit = false
+    @State private var maxChildCount = 0
+    @State private var spotsRemaining = 0
+    @State private var limitDescription = ""
+    @State private var participantCount = 0
+    @State private var childrenCount = 0
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -85,6 +93,31 @@ struct EnhancedEventDetailView: View {
                                     .foregroundColor(.green)
                             }
                         }
+                        
+                        // Capacity info (if applicable)
+                        if hasParticipantLimit {
+                            HStack {
+                                Image(systemName: "person.3")
+                                    .foregroundColor(Color("AppPrimaryColor"))
+                                
+                                Group {
+                                    if spotsRemaining > 0 {
+                                        Text("\(spotsRemaining) spots remaining")
+                                            .foregroundColor(spotsRemaining <= 5 ? .orange : .secondary)
+                                    } else {
+                                        Text("Event full")
+                                            .foregroundColor(.red)
+                                    }
+                                }
+                            }
+                            
+                            if !limitDescription.isEmpty {
+                                Text(limitDescription)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .padding(.top, 2)
+                            }
+                        }
                     }
                     
                     Divider()
@@ -96,9 +129,29 @@ struct EnhancedEventDetailView: View {
                     Text("Join us for a fantastic event suitable for children of all ages. This event promises fun activities, learning opportunities, and a chance to connect with other families in your community.")
                         .foregroundColor(.secondary)
                     
+                    // Attendance info
+                    if participantCount > 0 {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Currently attending:")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            Text("\(participantCount) parents with \(childrenCount) children")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                        }
+                        .padding(.top, 5)
+                    }
+                    
                     // Attendance buttons
                     HStack {
                         Button(action: {
+                            // Check if event is full before allowing attendance
+                            if hasParticipantLimit && spotsRemaining <= 0 && !isAttending {
+                                // Show alert that event is full
+                                return
+                            }
+                            
                             isAttending.toggle()
                         }) {
                             HStack {
@@ -107,10 +160,19 @@ struct EnhancedEventDetailView: View {
                             }
                             .padding(.vertical, 10)
                             .padding(.horizontal, 20)
-                            .background(isAttending ? Color("AppPrimaryColor") : Color(.systemGray6))
-                            .foregroundColor(isAttending ? .white : .primary)
+                            .background(
+                                (hasParticipantLimit && spotsRemaining <= 0 && !isAttending)
+                                ? Color(.systemGray4)
+                                : (isAttending ? Color("AppPrimaryColor") : Color(.systemGray6))
+                            )
+                            .foregroundColor(
+                                (hasParticipantLimit && spotsRemaining <= 0 && !isAttending)
+                                ? Color(.systemGray2)
+                                : (isAttending ? .white : .primary)
+                            )
                             .cornerRadius(25)
                         }
+                        .disabled(hasParticipantLimit && spotsRemaining <= 0 && !isAttending)
                         
                         Spacer()
                         
@@ -217,6 +279,33 @@ struct EnhancedEventDetailView: View {
             privacyLevel = "Private"
         default:
             privacyLevel = "Public"
+        }
+        
+        // Load limit information
+        // In a real app, this would be fetched from Core Data
+        
+        // Simulating an event with participant limit for demo
+        // Randomly determine if event has a limit
+        let idValue = Int(event.id) ?? 0
+        hasParticipantLimit = idValue % 3 == 0 // Every third event has a limit
+        
+        if hasParticipantLimit {
+            maxChildCount = 15 // Demo value
+            
+            // Demo attendance count
+            participantCount = Int.random(in: 3...10)
+            childrenCount = Int.random(in: participantCount...(participantCount + 5))
+            
+            // Calculate spots remaining based on children count
+            spotsRemaining = max(0, maxChildCount - childrenCount)
+            
+            // Get limit description if available
+            let limitDescriptions = UserDefaults.standard.dictionary(forKey: "EventLimitDescriptions") as? [String: String] ?? [:]
+            limitDescription = limitDescriptions[event.id] ?? "Limited to \(maxChildCount) children total."
+        } else {
+            // For events without limits, just show some random attendance
+            participantCount = Int.random(in: 2...8)
+            childrenCount = Int.random(in: participantCount...(participantCount + 8))
         }
         
         // In a real app, you would get this from the Event entity
