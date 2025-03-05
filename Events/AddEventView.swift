@@ -1,7 +1,7 @@
 import SwiftUI
 import CoreData
 
-struct EventForm: View {
+struct AddEventView: View {
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.managedObjectContext) private var viewContext
     

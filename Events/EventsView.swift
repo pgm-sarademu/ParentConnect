@@ -230,7 +230,7 @@ struct EventsView: View {
                 }
             }
             .sheet(isPresented: $showingAddEventSheet) {
-                EventForm()
+                AddEventView()
             }
             .sheet(isPresented: $showingFilters) {
                 EventFiltersView(filters: $filters, isPresented: $showingFilters)

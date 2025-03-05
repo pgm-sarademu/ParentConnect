@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		56AB34342D743AE7006A471B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34332D743AE7006A471B /* HomeView.swift */; };
-		56AB34362D743CF6006A471B /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34352D743CF6006A471B /* MessageView.swift */; };
-		56AB34382D743D38006A471B /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34372D743D38006A471B /* ChatView.swift */; };
 		56AB343A2D743FC0006A471B /* ActivitiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34392D743FC0006A471B /* ActivitiesView.swift */; };
 		56AB34552D75D11B006A471B /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34542D75D11B006A471B /* ProfileView.swift */; };
 		56AB348F2D763E23006A471B /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB348E2D763E23006A471B /* NotificationManager.swift */; };
@@ -38,8 +36,6 @@
 
 /* Begin PBXFileReference section */
 		56AB34332D743AE7006A471B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
-		56AB34352D743CF6006A471B /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
-		56AB34372D743D38006A471B /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		56AB34392D743FC0006A471B /* ActivitiesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitiesView.swift; sourceTree = "<group>"; };
 		56AB34542D75D11B006A471B /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		56AB348E2D763E23006A471B /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
@@ -66,6 +62,11 @@
 		56AB35042D78328C006A471B /* Events */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Events;
+			sourceTree = "<group>";
+		};
+		56AB350A2D7836FC006A471B /* Messages */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Messages;
 			sourceTree = "<group>";
 		};
 		56C328D02D723EAB005E6E8C /* ParentConnect */ = {
@@ -116,13 +117,12 @@
 		56C328C52D723EAB005E6E8C = {
 			isa = PBXGroup;
 			children = (
-				56AB35022D782E05006A471B /* ConnectionManager.swift */,
 				56AB34332D743AE7006A471B /* HomeView.swift */,
-				56AB34352D743CF6006A471B /* MessageView.swift */,
-				56AB34372D743D38006A471B /* ChatView.swift */,
+				56AB350A2D7836FC006A471B /* Messages */,
 				56AB35042D78328C006A471B /* Events */,
 				56AB34392D743FC0006A471B /* ActivitiesView.swift */,
 				56AB34542D75D11B006A471B /* ProfileView.swift */,
+				56AB35022D782E05006A471B /* ConnectionManager.swift */,
 				56AB34A22D77969C006A471B /* Models.swift */,
 				56AB34962D7769A6006A471B /* LocationManager.swift */,
 				56AB34902D763E49006A471B /* AppDelegate.swift */,
@@ -161,6 +161,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				56AB35042D78328C006A471B /* Events */,
+				56AB350A2D7836FC006A471B /* Messages */,
 				56C328D02D723EAB005E6E8C /* ParentConnect */,
 			);
 			name = ParentConnect;
@@ -289,10 +290,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				56AB34362D743CF6006A471B /* MessageView.swift in Sources */,
 				56AB34912D763E49006A471B /* AppDelegate.swift in Sources */,
 				56AB34552D75D11B006A471B /* ProfileView.swift in Sources */,
-				56AB34382D743D38006A471B /* ChatView.swift in Sources */,
 				56AB34342D743AE7006A471B /* HomeView.swift in Sources */,
 				56AB343A2D743FC0006A471B /* ActivitiesView.swift in Sources */,
 				56AB35032D782E05006A471B /* ConnectionManager.swift in Sources */,

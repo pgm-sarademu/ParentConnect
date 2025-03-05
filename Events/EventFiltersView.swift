@@ -41,6 +41,21 @@ struct EventFiltersView: View {
                         ForEach(EventFilters.PriceFilter.allCases, id: \.self) { option in
                             Text(option.rawValue).tag(option)
                         }
+                
+                // Clear all filters button
+                Section {
+                    Button(action: {
+                        // Reset all filters to default values
+                        tempFilters = EventFilters()
+                    }) {
+                        HStack {
+                            Spacer()
+                            Text("Remove All Filters")
+                                .foregroundColor(.red)
+                            Spacer()
+                        }
+                    }
+                }
                     }
                     .pickerStyle(SegmentedPickerStyle())
                 }
