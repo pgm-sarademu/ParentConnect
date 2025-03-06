@@ -280,17 +280,18 @@ struct EventsView: View {
                         .padding(.top, 4)
                     }
                     
-                    List {
-                        ForEach(filteredEvents) { event in
-                            NavigationLink(destination: EnhancedEventDetailView(event: event)) {
-                                // Use the enhanced row without star indicators
-                                EventListRowSimplified(event: event)
+                    // Event Grid Layout
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 165), spacing: 15)], spacing: 15) {
+                            ForEach(filteredEvents) { event in
+                                NavigationLink(destination: EnhancedEventDetailView(event: event)) {
+                                    EventCardView(event: event)
+                                }
                             }
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                         }
+                        .padding(.horizontal)
+                        .padding(.vertical, 10)
                     }
-                    .listStyle(PlainListStyle())
                 }
             }
             .navigationTitle("Events")
@@ -535,94 +536,85 @@ struct EventsView: View {
     }
 }
 
-// Simplified Event List Row Component without stars or relevance indicators
-struct EventListRowSimplified: View {
+// Card view for events in the grid
+struct EventCardView: View {
     let event: EventPreview
     
     var body: some View {
-        HStack(spacing: 15) {
-            // Date component
-            VStack(spacing: 2) {
-                Text(formatDay(event.date))
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: 0) {
+            // Event image with date overlay
+            ZStack(alignment: .bottomLeading) {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .aspectRatio(1.2, contentMode: .fit)
+                    .overlay(
+                        Text("🎪")
+                            .font(.system(size: 40))
+                    )
                 
-                Text(formatDayNumber(event.date))
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(Color("AppPrimaryColor"))
-                
-                Text(formatMonth(event.date))
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.secondary)
+                // Date badge overlay
+                HStack(spacing: 4) {
+                    VStack(spacing: 0) {
+                        Text(formatDay(event.date))
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                        
+                        Text(formatDayNumber(event.date))
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color("AppPrimaryColor"))
+                    .cornerRadius(8)
+                }
+                .padding(8)
             }
-            .frame(width: 60)
-            .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color("AppPrimaryColor").opacity(0.1))
-            )
             
-            // Event info
             VStack(alignment: .leading, spacing: 6) {
                 Text(event.title)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                     .lineLimit(1)
                 
                 HStack {
                     Image(systemName: "clock.fill")
-                        .font(.system(size: 12))
+                        .font(.system(size: 10))
                         .foregroundColor(Color("AppPrimaryColor").opacity(0.7))
                     
                     Text(formatTime(event.date))
-                        .font(.system(size: 14))
+                        .font(.system(size: 12))
                         .foregroundColor(.secondary)
                 }
                 
                 HStack {
                     Image(systemName: "mappin.circle.fill")
-                        .font(.system(size: 12))
+                        .font(.system(size: 10))
                         .foregroundColor(Color("AppPrimaryColor").opacity(0.7))
                     
                     Text(event.location)
-                        .font(.system(size: 14))
+                        .font(.system(size: 12))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
                 
                 // Age recommendation - simulated based on ID for demo
-                // In a real app, this would come from event data
                 HStack {
                     Image(systemName: "person.2.fill")
-                        .font(.system(size: 12))
+                        .font(.system(size: 10))
                         .foregroundColor(Color("AppPrimaryColor").opacity(0.7))
                     
                     let minAge = (Int(event.id) ?? 0) % 15 + 1
                     Text("Ages \(minAge)-\(minAge+3)")
-                        .font(.system(size: 14))
+                        .font(.system(size: 12))
                         .foregroundColor(.secondary)
                 }
             }
-            
-            Spacer()
-            
-            // Chevron
-            Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Color(.systemGray4))
+            .padding(10)
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 14)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
-        )
-    }
-    
-    private func formatDayNumber(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "d"
-        return formatter.string(from: date)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .foregroundColor(.primary) // Ensure text isn't blue when in a NavigationLink
     }
     
     private func formatDay(_ date: Date) -> String {
@@ -631,15 +623,40 @@ struct EventListRowSimplified: View {
         return formatter.string(from: date)
     }
     
-    private func formatMonth(_ date: Date) -> String {
+    private func formatDayNumber(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMM"
+        formatter.dateFormat = "d"
         return formatter.string(from: date)
     }
     
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
+        formatter.timeStyle = .short
         return formatter.string(from: date)
     }
+}
+
+// Helper functions - these would normally be extensions or utilities
+func formatTime(_ date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.timeStyle = .short
+    return formatter.string(from: date)
+}
+
+func formatDay(_ date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "EEE"
+    return formatter.string(from: date)
+}
+
+func formatDayNumber(_ date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "d"
+    return formatter.string(from: date)
+}
+
+func formatMonth(_ date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "MMM"
+    return formatter.string(from: date)
 }

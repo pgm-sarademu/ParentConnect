@@ -11,47 +11,40 @@ struct ContentView: View {
     var body: some View {
         if isLoggedIn {
             TabView(selection: $selectedTab) {
-                // Removed the nested NavigationView from HomeView
-                // since we're providing it here
-                NavigationView {
-                    HomeView()
-                }
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
-                .tag(0)
+                // Home tab
+                HomeView()
+                    .tabItem {
+                        Label("Home", systemImage: "house.fill")
+                    }
+                    .tag(0)
                 
-                NavigationView {
-                    MessagesView()
-                }
-                .tabItem {
-                    Label("Messages", systemImage: "message.fill")
-                }
-                .tag(1)
+                // Messages tab
+                MessagesView()
+                    .tabItem {
+                        Label("Messages", systemImage: "message.fill")
+                    }
+                    .tag(1)
                 
-                NavigationView {
-                    EventsView()
-                }
-                .tabItem {
-                    Label("Events", systemImage: "calendar")
-                }
-                .tag(2)
+                // Events tab
+                EventsView()
+                    .tabItem {
+                        Label("Events", systemImage: "calendar")
+                    }
+                    .tag(2)
                 
-                NavigationView {
-                    ActivitiesView()
-                }
-                .tabItem {
-                    Label("Activities", systemImage: "doc.fill")
-                }
-                .tag(3)
+                // Activities tab
+                ActivitiesView()
+                    .tabItem {
+                        Label("Activities", systemImage: "doc.fill")
+                    }
+                    .tag(3)
                 
-                NavigationView {
-                    ProfileView()
-                }
-                .tabItem {
-                    Label("Profile", systemImage: "person.fill")
-                }
-                .tag(4)
+                // Profile tab
+                ProfileView()
+                    .tabItem {
+                        Label("Profile", systemImage: "person.fill")
+                    }
+                    .tag(4)
             }
             .accentColor(Color("AppPrimaryColor"))
         } else {
