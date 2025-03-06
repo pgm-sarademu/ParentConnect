@@ -169,6 +169,33 @@ struct EventFiltersView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
+                // Age range filter section - MOVED TO TOP
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Age Range")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(ageRanges, id: \.self) { range in
+                                FilterChip(
+                                    title: range,
+                                    isSelected: tempFilters.ageFilter == range,
+                                    action: {
+                                        tempFilters.ageFilter = range
+                                    }
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+                .padding(.vertical)
+                .background(Color(.systemBackground))
+                
+                Divider()
+                
                 // Date filter section
                 VStack(alignment: .leading, spacing: 10) {
                     Text("When")
@@ -196,7 +223,7 @@ struct EventFiltersView: View {
                 
                 Divider()
                 
-                // Location filter section (NEW)
+                // Location filter section
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Location")
                         .font(.headline)
@@ -230,60 +257,6 @@ struct EventFiltersView: View {
                 
                 Divider()
                 
-                // Price filter section
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Price")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal)
-                    
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 10) {
-                            ForEach(EventFilters.PriceFilter.allCases, id: \.self) { option in
-                                FilterChip(
-                                    title: option.rawValue,
-                                    isSelected: tempFilters.priceFilter == option,
-                                    action: {
-                                        tempFilters.priceFilter = option
-                                    }
-                                )
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                }
-                .padding(.vertical)
-                .background(Color(.systemBackground))
-                
-                Divider()
-                
-                // Age range filter section
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Age Range")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal)
-                    
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 10) {
-                            ForEach(ageRanges, id: \.self) { range in
-                                FilterChip(
-                                    title: range,
-                                    isSelected: tempFilters.ageFilter == range,
-                                    action: {
-                                        tempFilters.ageFilter = range
-                                    }
-                                )
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                }
-                .padding(.vertical)
-                .background(Color(.systemBackground))
-                
-                Divider()
-                
                 // Distance filter section
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Distance")
@@ -299,6 +272,33 @@ struct EventFiltersView: View {
                                     isSelected: tempFilters.distanceFilter == option,
                                     action: {
                                         tempFilters.distanceFilter = option
+                                    }
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+                .padding(.vertical)
+                .background(Color(.systemBackground))
+                
+                Divider()
+                
+                // Price filter section
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Price")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(EventFilters.PriceFilter.allCases, id: \.self) { option in
+                                FilterChip(
+                                    title: option.rawValue,
+                                    isSelected: tempFilters.priceFilter == option,
+                                    action: {
+                                        tempFilters.priceFilter = option
                                     }
                                 )
                             }

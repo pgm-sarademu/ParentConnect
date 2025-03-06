@@ -11,35 +11,47 @@ struct ContentView: View {
     var body: some View {
         if isLoggedIn {
             TabView(selection: $selectedTab) {
-                HomeView()
-                    .tabItem {
-                        Label("Home", systemImage: "house.fill")
-                    }
-                    .tag(0)
+                // Removed the nested NavigationView from HomeView
+                // since we're providing it here
+                NavigationView {
+                    HomeView()
+                }
+                .tabItem {
+                    Label("Home", systemImage: "house.fill")
+                }
+                .tag(0)
                 
-                MessagesView()
-                    .tabItem {
-                        Label("Messages", systemImage: "message.fill")
-                    }
-                    .tag(1)
+                NavigationView {
+                    MessagesView()
+                }
+                .tabItem {
+                    Label("Messages", systemImage: "message.fill")
+                }
+                .tag(1)
                 
-                EventsView()
-                    .tabItem {
-                        Label("Events", systemImage: "calendar")
-                    }
-                    .tag(2)
+                NavigationView {
+                    EventsView()
+                }
+                .tabItem {
+                    Label("Events", systemImage: "calendar")
+                }
+                .tag(2)
                 
-                ActivitiesView()
-                    .tabItem {
-                        Label("Activities", systemImage: "doc.fill")
-                    }
-                    .tag(3)
+                NavigationView {
+                    ActivitiesView()
+                }
+                .tabItem {
+                    Label("Activities", systemImage: "doc.fill")
+                }
+                .tag(3)
                 
-                ProfileView()
-                    .tabItem {
-                        Label("Profile", systemImage: "person.fill")
-                    }
-                    .tag(4)
+                NavigationView {
+                    ProfileView()
+                }
+                .tabItem {
+                    Label("Profile", systemImage: "person.fill")
+                }
+                .tag(4)
             }
             .accentColor(Color("AppPrimaryColor"))
         } else {
@@ -153,13 +165,5 @@ struct LoginView: View {
             .padding(.bottom, 20)
         }
         .padding()
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-            .environmentObject(LocationManager())
-            .environmentObject(NotificationManager.shared)
     }
 }
