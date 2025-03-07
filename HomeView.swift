@@ -35,9 +35,18 @@ struct HomeView: View {
                         // Fixed Map implementation
                         if #available(iOS 17.0, *) {
                             Map(initialPosition: MapCameraPosition.region(region)) {
+                                // Parent markers
                                 ForEach(nearbyParents) { parent in
                                     if let coord = getParentCoordinates(parent) {
                                         Marker(parent.name, coordinate: coord)
+                                            .tint(.blue)
+                                    }
+                                }
+                                
+                                // Event markers
+                                ForEach(upcomingEvents) { event in
+                                    if let coord = getEventCoordinates(event) {
+                                        Marker(event.title, coordinate: coord)
                                             .tint(Color("AppPrimaryColor"))
                                     }
                                 }
@@ -50,20 +59,38 @@ struct HomeView: View {
                             // Create annotated items first
                             let annotatedItems = createAnnotatedItems()
                             Map(coordinateRegion: $region, annotationItems: annotatedItems) { item in
-                                MapMarker(coordinate: item.coordinate, tint: Color("AppPrimaryColor"))
+                                MapMarker(coordinate: item.coordinate, tint: item.isParent ? .blue : Color("AppPrimaryColor"))
                             }
                             .frame(height: 200)
                             .cornerRadius(12)
                         }
                         
-                        Text("Parents Near You")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .padding(8)
-                            .background(Color("AppPrimaryColor"))
-                            .cornerRadius(8)
-                            .padding(.bottom, 8)
+                        // Map legend
+                        HStack(spacing: 16) {
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(.blue)
+                                    .frame(width: 8, height: 8)
+                                Text("Parents")
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                            }
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(Color("AppPrimaryColor"))
+                                    .frame(width: 8, height: 8)
+                                Text("Events")
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .background(Color.black.opacity(0.6))
+                        .cornerRadius(8)
+                        .padding(.bottom, 8)
                     }
                     .padding(.horizontal)
                     
@@ -194,20 +221,28 @@ struct HomeView: View {
         return ActivityDetailView(activity: activityItem)
     }
     
-    // Helper struct for Map annotations
-    struct AnnotatedParent: Identifiable {
+    // New annotation struct for map items
+    private struct AnnotatedItem: Identifiable {
         let id: String
-        let name: String
         let coordinate: CLLocationCoordinate2D
+        let isParent: Bool
     }
     
-    // Helper function to pre-create annotated items
-    private func createAnnotatedItems() -> [AnnotatedParent] {
-        var items = [AnnotatedParent]()
+    // Helper function to create combined annotated items
+    private func createAnnotatedItems() -> [AnnotatedItem] {
+        var items = [AnnotatedItem]()
         
+        // Add parent annotations
         for parent in nearbyParents {
             if let coord = getParentCoordinates(parent) {
-                items.append(AnnotatedParent(id: parent.id, name: parent.name, coordinate: coord))
+                items.append(AnnotatedItem(id: parent.id, coordinate: coord, isParent: true))
+            }
+        }
+        
+        // Add event annotations
+        for event in upcomingEvents {
+            if let coord = getEventCoordinates(event) {
+                items.append(AnnotatedItem(id: "event_\(event.id)", coordinate: coord, isParent: false))
             }
         }
         
@@ -223,6 +258,24 @@ struct HomeView: View {
         if let idNum = Int(parent.id) {
             let latOffset = Double(idNum % 10) * 0.002
             let longOffset = Double((idNum * 3) % 10) * 0.002
+            return CLLocationCoordinate2D(
+                latitude: baseLocation.latitude + latOffset,
+                longitude: baseLocation.longitude + longOffset
+            )
+        }
+        
+        return baseLocation
+    }
+    
+    // New helper function to get coordinates for events
+    private func getEventCoordinates(_ event: EventPreview) -> CLLocationCoordinate2D? {
+        // Mock implementation - in a real app, this would use actual stored coordinates
+        let baseLocation = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+        
+        // Generate a slightly different offset for events to avoid overlapping with parents
+        if let idNum = Int(event.id) {
+            let latOffset = Double(idNum % 10) * 0.0025 + 0.001
+            let longOffset = Double((idNum * 2) % 10) * 0.0025 - 0.001
             return CLLocationCoordinate2D(
                 latitude: baseLocation.latitude + latOffset,
                 longitude: baseLocation.longitude + longOffset
