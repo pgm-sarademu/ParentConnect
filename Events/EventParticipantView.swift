@@ -217,7 +217,7 @@ struct EventParticipantView: View {
     
     private func displayUserCardFor(_ attendee: MockAttendee) {
         // Create a participant info object from the mock attendee
-        let childrenParts = attendee.childrenInfo.components(separatedBy: " ")
+        // Get child count from the attendee
         let childCount = attendee.childCount
         
         // Create mock children based on available info
