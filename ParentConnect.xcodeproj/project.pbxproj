@@ -15,6 +15,7 @@
 		56AB34972D7769A6006A471B /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34962D7769A6006A471B /* LocationManager.swift */; };
 		56AB34A32D77969C006A471B /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34A22D77969C006A471B /* Models.swift */; };
 		56AB35032D782E05006A471B /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB35022D782E05006A471B /* ConnectionManager.swift */; };
+		56AB35AD2D7B474B006A471B /* UserCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB35AC2D7B474B006A471B /* UserCard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +44,7 @@
 		56AB34962D7769A6006A471B /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		56AB34A22D77969C006A471B /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		56AB35022D782E05006A471B /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
+		56AB35AC2D7B474B006A471B /* UserCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCard.swift; sourceTree = "<group>"; };
 		56C328CE2D723EAB005E6E8C /* ParentConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ParentConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		56C328E52D723EAD005E6E8C /* ParentConnectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ParentConnectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		56C328EF2D723EAD005E6E8C /* ParentConnectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ParentConnectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -117,6 +119,7 @@
 		56C328C52D723EAB005E6E8C = {
 			isa = PBXGroup;
 			children = (
+				56AB35AC2D7B474B006A471B /* UserCard.swift */,
 				56AB34332D743AE7006A471B /* HomeView.swift */,
 				56AB350A2D7836FC006A471B /* Messages */,
 				56AB35042D78328C006A471B /* Events */,
@@ -297,6 +300,7 @@
 				56AB35032D782E05006A471B /* ConnectionManager.swift in Sources */,
 				56AB348F2D763E23006A471B /* NotificationManager.swift in Sources */,
 				56AB34972D7769A6006A471B /* LocationManager.swift in Sources */,
+				56AB35AD2D7B474B006A471B /* UserCard.swift in Sources */,
 				56AB34A32D77969C006A471B /* Models.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
