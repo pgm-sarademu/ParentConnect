@@ -2,6 +2,34 @@ import SwiftUI
 import CoreData
 import MapKit
 
+// Custom navigation bar view for EventsView
+struct EventsNavigationBar: View {
+    var onAddTapped: () -> Void
+    
+    var body: some View {
+        ZStack {
+            Color(.systemBackground)
+                .ignoresSafeArea()
+            
+            HStack {
+                Text("Events")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+                Spacer()
+                
+                Button(action: onAddTapped) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(Color("AppPrimaryColor"))
+                }
+            }
+            .padding(.horizontal)
+        }
+        .frame(height: 60)
+    }
+}
+
 struct EventsView: View {
     @EnvironmentObject var locationManager: LocationManager
     @State private var events: [EventPreview] = []
@@ -121,7 +149,13 @@ struct EventsView: View {
     
     var body: some View {
         NavigationView {
-            VStack {
+            VStack(spacing: 0) {
+                // Custom navigation bar
+                EventsNavigationBar(onAddTapped: {
+                    showingAddEventSheet = true
+                })
+                .padding(.bottom, 4)
+                
                 // Filter summary bar
                 HStack(spacing: 12) {
                     Button(action: {
@@ -294,21 +328,11 @@ struct EventsView: View {
                     }
                 }
             }
-            .navigationTitle("Events")
+            .navigationBarHidden(true)
             .searchable(text: $searchText, prompt: "Search events")
             .onAppear {
                 loadMockEvents()
                 loadUserProfile()
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showingAddEventSheet = true
-                    }) {
-                        Image(systemName: "plus.circle.fill")
-                            .foregroundColor(Color("AppPrimaryColor"))
-                    }
-                }
             }
             .sheet(isPresented: $showingAddEventSheet) {
                 AddEventView()
