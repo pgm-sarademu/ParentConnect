@@ -305,16 +305,6 @@ struct EventsView: View {
                     Spacer()
                 }
             } else {
-                // Display info about sorting at the top
-                HStack {
-                    Text("Events sorted by date, location and child age relevance")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                }
-                .padding(.horizontal)
-                .padding(.top, 2)
-                
                 // Display location header if using custom location
                 if case let .customLocation(_, name) = filters.customLocation {
                     HStack {

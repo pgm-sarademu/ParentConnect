@@ -123,11 +123,11 @@
 		56C328C52D723EAB005E6E8C = {
 			isa = PBXGroup;
 			children = (
-				56AB35DA2D7CBB19006A471B /* Activities */,
-				56AB35D92D7CBAFD006A471B /* Users */,
 				56AB34332D743AE7006A471B /* Home.swift */,
+				56AB35D92D7CBAFD006A471B /* Users */,
 				56AB350A2D7836FC006A471B /* Messages */,
 				56AB35042D78328C006A471B /* Events */,
+				56AB35DA2D7CBB19006A471B /* Activities */,
 				56AB35022D782E05006A471B /* ConnectionManager.swift */,
 				56AB34A22D77969C006A471B /* Models.swift */,
 				56AB34962D7769A6006A471B /* LocationManager.swift */,
