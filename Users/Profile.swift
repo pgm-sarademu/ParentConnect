@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ProfileView: View {
+struct Profile: View {
     @State private var showingEditProfile = false
     @State private var showingFeedbackSheet = false
     @State private var showingNotificationSettings = false
@@ -142,6 +142,58 @@ struct ProfileView: View {
                     }
                     .padding(.vertical)
                     
+                    // New section for App Activity
+                    VStack(alignment: .leading, spacing: 15) {
+                        Text("App Activity")
+                            .font(.headline)
+                            .padding(.horizontal)
+                        
+                        // Event History Button
+                        NavigationLink(destination: EventHistory()) {
+                            HStack {
+                                Image(systemName: "calendar.badge.clock")
+                                    .foregroundColor(.primary)
+                                Text("Event History")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Text("8 events")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding()
+                            .background(Color(.systemBackground))
+                            .cornerRadius(12)
+                        }
+                        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+                        .padding(.horizontal)
+                        
+                        // My Connections Button
+                        Button(action: {
+                            // Navigate to connections view
+                        }) {
+                            HStack {
+                                Image(systemName: "person.2.fill")
+                                    .foregroundColor(.primary)
+                                Text("My Connections")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Text("5 parents")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding()
+                            .background(Color(.systemBackground))
+                            .cornerRadius(12)
+                        }
+                        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+                        .padding(.horizontal)
+                    }
+                    .padding(.vertical)
+                    
                     // Settings & preferences section
                     VStack(alignment: .leading, spacing: 15) {
                         Text("Settings & Preferences")
@@ -229,10 +281,10 @@ struct ProfileView: View {
             }
             .navigationTitle("Profile")
             .sheet(isPresented: $showingEditProfile) {
-                EditProfileView(user: $user)
+                EditProfile(user: $user)
             }
             .sheet(isPresented: $showingFeedbackSheet) {
-                FeedbackView()
+                Feedback()
             }
         }
     }
@@ -265,7 +317,7 @@ struct MockChild: Identifiable {
     var age: Int
 }
 
-struct EditProfileView: View {
+struct EditProfile: View {
     @Environment(\.presentationMode) var presentationMode
     @Binding var user: MockUser
     
@@ -305,7 +357,7 @@ struct EditProfileView: View {
     }
 }
 
-struct FeedbackView: View {
+struct Feedback: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var feedbackType = "Feature Request"
     @State private var feedbackText = ""

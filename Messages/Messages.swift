@@ -100,7 +100,7 @@ struct MessagesView: View {
             loadMockConversations()
         }
         .sheet(isPresented: $showingProfileView) {
-            ProfileView()
+            Profile()
         }
     }
     

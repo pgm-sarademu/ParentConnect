@@ -156,7 +156,7 @@ struct HomeView: View {
                         
                         Spacer()
                         
-                        NavigationLink(destination: ActivitiesView()) {
+                        NavigationLink(destination: Activities()) {
                             Text("See All")
                                 .font(.subheadline)
                                 .foregroundColor(Color("AppPrimaryColor"))
@@ -194,7 +194,7 @@ struct HomeView: View {
             }
         }
         .sheet(isPresented: $showingProfileView) {
-            ProfileView()
+            Profile()
         }
     }
     
@@ -208,7 +208,7 @@ struct HomeView: View {
             description: "Details for \(activity.title). This is a placeholder description since we're navigating from the home screen."
         )
         
-        return ActivityDetailView(activity: activityItem)
+        return ActivityDetail(activity: activityItem)
     }
     
     // New annotation struct for map items

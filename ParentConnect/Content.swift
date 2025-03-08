@@ -33,7 +33,7 @@ struct ContentView: View {
                     .tag(2)
                 
                 // Activities tab
-                ActivitiesView()
+                Activities()
                     .tabItem {
                         Label("Activities", systemImage: "doc.fill")
                     }

@@ -355,7 +355,7 @@ struct EventsView: View {
             EventFiltersView(filters: $filters, isPresented: $showingFilters)
         }
         .sheet(isPresented: $showingProfileView) {
-            ProfileView()
+            Profile()
         }
     }
     
