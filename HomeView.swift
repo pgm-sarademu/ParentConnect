@@ -21,190 +21,209 @@ struct HomeView: View {
     @State private var nearbyParents: [ParentPreview] = []
     @State private var featuredActivities: [ActivityPreview] = []
     @State private var upcomingEvents: [EventPreview] = []
+    @State private var showingProfileView = false
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
         span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
     )
     
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Map section
-                    ZStack(alignment: .bottom) {
-                        // Fixed Map implementation
-                        if #available(iOS 17.0, *) {
-                            Map(initialPosition: MapCameraPosition.region(region)) {
-                                // Parent markers
-                                ForEach(nearbyParents) { parent in
-                                    if let coord = getParentCoordinates(parent) {
-                                        Marker(parent.name, coordinate: coord)
-                                            .tint(.blue)
-                                    }
-                                }
-                                
-                                // Event markers
-                                ForEach(upcomingEvents) { event in
-                                    if let coord = getEventCoordinates(event) {
-                                        Marker(event.title, coordinate: coord)
-                                            .tint(Color("AppPrimaryColor"))
-                                    }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Custom title with profile button
+                HStack {
+                    Text("Parent Connect")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    Spacer()
+                    Button(action: {
+                        showingProfileView = true
+                    }) {
+                        Image(systemName: "person.circle.fill")
+                            .foregroundColor(Color("AppPrimaryColor"))
+                            .font(.system(size: 28))
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.top, 5)
+                
+                // Map section
+                ZStack(alignment: .bottom) {
+                    // Fixed Map implementation
+                    if #available(iOS 17.0, *) {
+                        Map(initialPosition: MapCameraPosition.region(region)) {
+                            // Parent markers
+                            ForEach(nearbyParents) { parent in
+                                if let coord = getParentCoordinates(parent) {
+                                    Marker(parent.name, coordinate: coord)
+                                        .tint(.blue)
                                 }
                             }
-                            .mapStyle(.standard)
-                            .frame(height: 200)
-                            .cornerRadius(12)
-                        } else {
-                            // Fallback for iOS 16 and earlier
-                            // Create annotated items first
-                            let annotatedItems = createAnnotatedItems()
-                            Map(coordinateRegion: $region, annotationItems: annotatedItems) { item in
-                                MapMarker(coordinate: item.coordinate, tint: item.isParent ? .blue : Color("AppPrimaryColor"))
+                            
+                            // Event markers
+                            ForEach(upcomingEvents) { event in
+                                if let coord = getEventCoordinates(event) {
+                                    Marker(event.title, coordinate: coord)
+                                        .tint(Color("AppPrimaryColor"))
+                                }
                             }
-                            .frame(height: 200)
-                            .cornerRadius(12)
                         }
+                        .mapStyle(.standard)
+                        .frame(height: 200)
+                        .cornerRadius(12)
+                    } else {
+                        // Fallback for iOS 16 and earlier
+                        // Create annotated items first
+                        let annotatedItems = createAnnotatedItems()
+                        Map(coordinateRegion: $region, annotationItems: annotatedItems) { item in
+                            MapMarker(coordinate: item.coordinate, tint: item.isParent ? .blue : Color("AppPrimaryColor"))
+                        }
+                        .frame(height: 200)
+                        .cornerRadius(12)
+                    }
+                    
+                    // Map legend
+                    HStack(spacing: 16) {
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(.blue)
+                                .frame(width: 8, height: 8)
+                            Text("Parents")
+                                .font(.caption2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                        }
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(Color("AppPrimaryColor"))
+                                .frame(width: 8, height: 8)
+                            Text("Events")
+                                .font(.caption2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                    .background(Color.black.opacity(0.6))
+                    .cornerRadius(8)
+                    .padding(.bottom, 8)
+                }
+                .padding(.horizontal)
+                
+                // Upcoming events section
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("Upcoming Events")
+                            .font(.title2)
+                            .fontWeight(.bold)
                         
-                        // Map legend
-                        HStack(spacing: 16) {
-                            HStack(spacing: 4) {
-                                Circle()
-                                    .fill(.blue)
-                                    .frame(width: 8, height: 8)
-                                Text("Parents")
-                                    .font(.caption2)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.white)
-                            }
-                            HStack(spacing: 4) {
-                                Circle()
-                                    .fill(Color("AppPrimaryColor"))
-                                    .frame(width: 8, height: 8)
-                                Text("Events")
-                                    .font(.caption2)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.white)
-                            }
+                        Spacer()
+                        
+                        NavigationLink(destination: EventsView()) {
+                            Text("See All")
+                                .font(.subheadline)
+                                .foregroundColor(Color("AppPrimaryColor"))
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 6)
-                        .background(Color.black.opacity(0.6))
-                        .cornerRadius(8)
-                        .padding(.bottom, 8)
                     }
                     .padding(.horizontal)
                     
-                    // Upcoming events section
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Text("Upcoming Events")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                            
-                            Spacer()
-                            
-                            NavigationLink(destination: EventsView()) {
-                                Text("See All")
-                                    .font(.subheadline)
-                                    .foregroundColor(Color("AppPrimaryColor"))
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 15) {
+                            ForEach(upcomingEvents) { event in
+                                NavigationLink {
+                                    EnhancedEventDetailView(event: event)
+                                } label: {
+                                    HomeEventCard(event: event)
+                                        .foregroundColor(.primary)
+                                }
                             }
                         }
                         .padding(.horizontal)
-                        
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 15) {
-                                ForEach(upcomingEvents) { event in
-                                    NavigationLink {
-                                        EnhancedEventDetailView(event: event)
-                                    } label: {
-                                        HomeEventCard(event: event)
-                                            .foregroundColor(.primary)
-                                    }
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-                    }
-                    
-                    // Nearby parents section
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Text("Connect with Parents")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                            
-                            Spacer()
-                            
-                            Button(action: {
-                                // View all nearby parents
-                            }) {
-                                Text("See All")
-                                    .font(.subheadline)
-                                    .foregroundColor(Color("AppPrimaryColor"))
-                            }
-                        }
-                        .padding(.horizontal)
-                        
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 15) {
-                                ForEach(nearbyParents) { parent in
-                                    ParentCard(parent: parent)
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-                    }
-                    
-                    // Spacer between sections
-                    Spacer()
-                        .frame(height: 20)
-                    
-                    // Activities section
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Text("Activities & Printables")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                            
-                            Spacer()
-                            
-                            NavigationLink(destination: ActivitiesView()) {
-                                Text("See All")
-                                    .font(.subheadline)
-                                    .foregroundColor(Color("AppPrimaryColor"))
-                            }
-                        }
-                        .padding(.horizontal)
-                        
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 15) {
-                                ForEach(featuredActivities) { activity in
-                                    NavigationLink {
-                                        activityDetailDestination(for: activity)
-                                    } label: {
-                                        HomeActivityCard(activity: activity)
-                                            .foregroundColor(.primary)
-                                    }
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
                     }
                 }
-                .padding(.vertical)
-            }
-            .navigationTitle("Parent Connect")
-            .onAppear {
-                loadMockData()
                 
-                // Update map with user's location if available
-                if let userLocation = locationManager.location?.coordinate {
-                    region = MKCoordinateRegion(
-                        center: userLocation,
-                        span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
-                    )
+                // Nearby parents section
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("Connect with Parents")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            // View all nearby parents
+                        }) {
+                            Text("See All")
+                                .font(.subheadline)
+                                .foregroundColor(Color("AppPrimaryColor"))
+                        }
+                    }
+                    .padding(.horizontal)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 15) {
+                            ForEach(nearbyParents) { parent in
+                                ParentCard(parent: parent)
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+                
+                // Spacer between sections
+                Spacer()
+                    .frame(height: 20)
+                
+                // Activities section
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("Activities & Printables")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        Spacer()
+                        
+                        NavigationLink(destination: ActivitiesView()) {
+                            Text("See All")
+                                .font(.subheadline)
+                                .foregroundColor(Color("AppPrimaryColor"))
+                        }
+                    }
+                    .padding(.horizontal)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 15) {
+                            ForEach(featuredActivities) { activity in
+                                NavigationLink {
+                                    activityDetailDestination(for: activity)
+                                } label: {
+                                    HomeActivityCard(activity: activity)
+                                        .foregroundColor(.primary)
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
                 }
             }
+            .padding(.vertical)
+        }
+        .navigationBarHidden(true)
+        .onAppear {
+            loadMockData()
+            
+            // Update map with user's location if available
+            if let userLocation = locationManager.location?.coordinate {
+                region = MKCoordinateRegion(
+                    center: userLocation,
+                    span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
+                )
+            }
+        }
+        .sheet(isPresented: $showingProfileView) {
+            ProfileView()
         }
     }
     

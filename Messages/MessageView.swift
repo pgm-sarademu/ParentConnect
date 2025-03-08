@@ -4,73 +4,103 @@ import CoreData
 struct MessagesView: View {
     @State private var conversations: [ConversationPreview] = []
     @State private var searchText = ""
+    @State private var showingProfileView = false
     
     var body: some View {
-        NavigationView {
-            VStack {
-                // No read receipts info banner
-                HStack {
-                    Image(systemName: "info.circle.fill")
+        VStack {
+            // Custom title with profile button
+            HStack {
+                Text("Messages")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                Spacer()
+                Button(action: {
+                    showingProfileView = true
+                }) {
+                    Image(systemName: "person.circle.fill")
                         .foregroundColor(Color("AppPrimaryColor"))
-                    
-                    Text("No read receipts - parents can respond when they have time")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 28))
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                .background(Color("AppPrimaryColor").opacity(0.1))
-                .cornerRadius(8)
-                .padding(.horizontal)
+            }
+            .padding(.horizontal)
+            .padding(.top, 5)
+            
+            // No read receipts info banner
+            HStack {
+                Image(systemName: "info.circle.fill")
+                    .foregroundColor(Color("AppPrimaryColor"))
                 
-                if conversations.isEmpty {
-                    VStack(spacing: 15) {
-                        Spacer()
-                        Image(systemName: "message.circle")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 80, height: 80)
-                            .foregroundColor(Color(.systemGray4))
-                        
-                        Text("No conversations yet")
+                Text("No read receipts - parents can respond when they have time")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(Color("AppPrimaryColor").opacity(0.1))
+            .cornerRadius(8)
+            .padding(.horizontal)
+            
+            // Search bar
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                TextField("Search conversations", text: $searchText)
+            }
+            .padding(8)
+            .background(Color(.systemGray6))
+            .cornerRadius(10)
+            .padding(.horizontal)
+            .padding(.vertical, 10)
+            
+            if conversations.isEmpty {
+                VStack(spacing: 15) {
+                    Spacer()
+                    Image(systemName: "message.circle")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 80, height: 80)
+                        .foregroundColor(Color(.systemGray4))
+                    
+                    Text("No conversations yet")
+                        .font(.headline)
+                    
+                    Text("Connect with parents to start chatting")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Button(action: {
+                        // Navigate to home to find parents
+                    }) {
+                        Text("Find Parents")
                             .font(.headline)
-                        
-                        Text("Connect with parents to start chatting")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        
-                        Button(action: {
-                            // Navigate to home to find parents
-                        }) {
-                            Text("Find Parents")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 10)
-                                .background(Color("AppPrimaryColor"))
-                                .cornerRadius(20)
-                        }
-                        .padding(.top, 10)
-                        
-                        Spacer()
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(Color("AppPrimaryColor"))
+                            .cornerRadius(20)
                     }
-                    .padding()
-                } else {
-                    List {
-                        ForEach(conversations) { conversation in
-                            NavigationLink(destination: ChatView(conversation: conversation)) {
-                                ConversationRow(conversation: conversation)
-                            }
-                        }
-                    }
-                    .listStyle(PlainListStyle())
+                    .padding(.top, 10)
+                    
+                    Spacer()
                 }
+                .padding()
+            } else {
+                List {
+                    ForEach(conversations) { conversation in
+                        NavigationLink(destination: ChatView(conversation: conversation)) {
+                            ConversationRow(conversation: conversation)
+                        }
+                    }
+                }
+                .listStyle(PlainListStyle())
             }
-            .navigationTitle("Messages")
-            .searchable(text: $searchText, prompt: "Search conversations")
-            .onAppear {
-                loadMockConversations()
-            }
+        }
+        .navigationBarHidden(true)
+        .onAppear {
+            loadMockConversations()
+        }
+        .sheet(isPresented: $showingProfileView) {
+            ProfileView()
         }
     }
     
@@ -160,11 +190,5 @@ struct ConversationRow: View {
             formatter.dateFormat = "MM/dd/yy"
             return formatter.string(from: date)
         }
-    }
-}
-
-struct MessagesView_Previews: PreviewProvider {
-    static var previews: some View {
-        MessagesView()
     }
 }

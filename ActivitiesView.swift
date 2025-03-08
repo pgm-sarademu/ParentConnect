@@ -4,6 +4,7 @@ struct ActivitiesView: View {
     @State private var activities: [ActivityItem] = []
     @State private var searchText = ""
     @State private var selectedCategory: String? = "All"
+    @State private var showingProfileView = false
     
     let categories = ["All", "Printables", "Guides", "Crafts", "Educational", "Outdoor"]
     
@@ -22,52 +23,81 @@ struct ActivitiesView: View {
     }
     
     var body: some View {
-        NavigationView {
-            VStack {
-                // Category selector
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach(categories, id: \.self) { category in
-                            Button(action: {
-                                selectedCategory = category
-                            }) {
-                                Text(category)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
-                                    .background(
-                                        selectedCategory == category ?
-                                        Color("AppPrimaryColor") :
-                                        Color(.systemGray6)
-                                    )
-                                    .foregroundColor(
-                                        selectedCategory == category ?
-                                        .white :
-                                        .primary
-                                    )
-                                    .cornerRadius(20)
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-                
-                // Activities grid
-                ScrollView {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 16)], spacing: 16) {
-                        ForEach(filteredActivities) { activity in
-                            NavigationLink(destination: ActivityDetailView(activity: activity)) {
-                                ActivityCard(activity: activity)
-                            }
-                        }
-                    }
-                    .padding()
+        VStack {
+            // Custom title with profile button
+            HStack {
+                Text("Activities")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                Spacer()
+                Button(action: {
+                    showingProfileView = true
+                }) {
+                    Image(systemName: "person.circle.fill")
+                        .foregroundColor(Color("AppPrimaryColor"))
+                        .font(.system(size: 28))
                 }
             }
-            .navigationTitle("Activities")
-            .searchable(text: $searchText, prompt: "Search activities")
-            .onAppear {
-                loadMockActivities()
+            .padding(.horizontal)
+            .padding(.top, 5)
+            
+            // Category selector
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
+                    ForEach(categories, id: \.self) { category in
+                        Button(action: {
+                            selectedCategory = category
+                        }) {
+                            Text(category)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(
+                                    selectedCategory == category ?
+                                    Color("AppPrimaryColor") :
+                                    Color(.systemGray6)
+                                )
+                                .foregroundColor(
+                                    selectedCategory == category ?
+                                    .white :
+                                    .primary
+                                )
+                                .cornerRadius(20)
+                        }
+                    }
+                }
+                .padding(.horizontal)
             }
+            
+            // Search bar
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                TextField("Search activities", text: $searchText)
+            }
+            .padding(8)
+            .background(Color(.systemGray6))
+            .cornerRadius(10)
+            .padding(.horizontal)
+            .padding(.vertical, 10)
+            
+            // Activities grid
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 16)], spacing: 16) {
+                    ForEach(filteredActivities) { activity in
+                        NavigationLink(destination: ActivityDetailView(activity: activity)) {
+                            ActivityCard(activity: activity)
+                        }
+                    }
+                }
+                .padding()
+            }
+        }
+        .navigationBarHidden(true)
+        .onAppear {
+            loadMockActivities()
+        }
+        .sheet(isPresented: $showingProfileView) {
+            ProfileView()
         }
     }
     

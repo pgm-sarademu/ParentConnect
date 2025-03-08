@@ -5,58 +5,41 @@ import MapKit
 struct ContentView: View {
     @State private var selectedTab = 0
     @State private var isLoggedIn = false
-    @State private var showingProfileView = false
     @EnvironmentObject var locationManager: LocationManager
     @EnvironmentObject var notificationManager: NotificationManager
     
     var body: some View {
         if isLoggedIn {
-            NavigationView {
-                TabView(selection: $selectedTab) {
-                    // Home tab
-                    HomeView()
-                        .tabItem {
-                            Label("Home", systemImage: "house.fill")
-                        }
-                        .tag(0)
-                    
-                    // Messages tab
-                    MessagesView()
-                        .tabItem {
-                            Label("Messages", systemImage: "message.fill")
-                        }
-                        .tag(1)
-                    
-                    // Events tab
-                    EventsView()
-                        .tabItem {
-                            Label("Events", systemImage: "calendar")
-                        }
-                        .tag(2)
-                    
-                    // Activities tab
-                    ActivitiesView()
-                        .tabItem {
-                            Label("Activities", systemImage: "doc.fill")
-                        }
-                        .tag(3)
-                }
-                .accentColor(Color("AppPrimaryColor"))
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: {
-                            showingProfileView = true
-                        }) {
-                            Image(systemName: "person.circle.fill")
-                                .foregroundColor(Color("AppPrimaryColor"))
-                                .font(.system(size: 22))
-                        }
+            TabView(selection: $selectedTab) {
+                // Home tab
+                HomeView()
+                    .tabItem {
+                        Label("Home", systemImage: "house.fill")
                     }
-                }
-                .sheet(isPresented: $showingProfileView) {
-                    ProfileView()
-                }
+                    .tag(0)
+                
+                // Messages tab
+                MessagesView()
+                    .tabItem {
+                        Label("Messages", systemImage: "message.fill")
+                    }
+                    .tag(1)
+                
+                // Events tab
+                EventsView()
+                    .tabItem {
+                        Label("Events", systemImage: "calendar")
+                    }
+                    .tag(2)
+                
+                // Activities tab
+                ActivitiesView()
+                    .tabItem {
+                        Label("Activities", systemImage: "doc.fill")
+                    }
+                    .tag(3)
             }
+            .accentColor(Color("AppPrimaryColor"))
         } else {
             LoginView(isLoggedIn: $isLoggedIn)
         }
