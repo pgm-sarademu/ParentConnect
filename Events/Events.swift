@@ -131,9 +131,9 @@ struct EventsView: View {
                 Button(action: {
                     showingProfileView = true
                 }) {
-                    Image(systemName: "person.circle.fill")
+                    Image(systemName: "person")
                         .foregroundColor(Color("AppPrimaryColor"))
-                        .font(.system(size: 28))
+                        .font(.system(size: 24))
                 }
             }
             .padding(.horizontal)
@@ -160,28 +160,18 @@ struct EventsView: View {
                         .foregroundColor(Color("AppPrimaryColor"))
                 }
                 .padding(.leading, 8)
-            }
-            .padding()
-            
-            // Add Event button below search bar
-            HStack {
-                Spacer()
+                
+                // Add Event button (just + icon)
                 Button(action: {
                     showingAddEventSheet = true
                 }) {
-                    HStack {
-                        Image(systemName: "plus.circle.fill")
-                        Text("Create Event")
-                    }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 16)
-                    .background(Color("AppPrimaryColor"))
-                    .foregroundColor(.white)
-                    .cornerRadius(20)
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(Color("AppPrimaryColor"))
                 }
+                .padding(.leading, 8)
             }
-            .padding(.horizontal)
-            .padding(.bottom, 10)
+            .padding()
             
             // Active filter tags
             HStack(spacing: 8) {

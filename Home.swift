@@ -39,9 +39,9 @@ struct HomeView: View {
                     Button(action: {
                         showingProfileView = true
                     }) {
-                        Image(systemName: "person.circle.fill")
+                        Image(systemName: "person")
                             .foregroundColor(Color("AppPrimaryColor"))
-                            .font(.system(size: 28))
+                            .font(.system(size: 24))
                     }
                 }
                 .padding(.horizontal)
