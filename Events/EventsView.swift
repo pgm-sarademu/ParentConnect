@@ -2,34 +2,6 @@ import SwiftUI
 import CoreData
 import MapKit
 
-// Custom navigation bar view for EventsView
-struct EventsNavigationBar: View {
-    var onAddTapped: () -> Void
-    
-    var body: some View {
-        ZStack {
-            Color(.systemBackground)
-                .ignoresSafeArea()
-            
-            HStack {
-                Text("Events")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                
-                Spacer()
-                
-                Button(action: onAddTapped) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(Color("AppPrimaryColor"))
-                }
-            }
-            .padding(.horizontal)
-        }
-        .frame(height: 60)
-    }
-}
-
 struct EventsView: View {
     @EnvironmentObject var locationManager: LocationManager
     @State private var events: [EventPreview] = []
@@ -150,40 +122,46 @@ struct EventsView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // Custom navigation bar
-                EventsNavigationBar(onAddTapped: {
-                    showingAddEventSheet = true
-                })
-                .padding(.bottom, 4)
-                
-                // Filter summary bar
-                HStack(spacing: 12) {
+                // Custom search and filter bar
+                HStack {
+                    // Search field
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.secondary)
+                        TextField("Search events", text: $searchText)
+                    }
+                    .padding(8)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
+                    
+                    // Filter button
                     Button(action: {
                         showingFilters = true
                     }) {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.system(size: 18))
+                            .foregroundColor(Color("AppPrimaryColor"))
+                    }
+                    .padding(.leading, 8)
+                }
+                .padding()
+                
+                // Active filter tags
+                HStack(spacing: 8) {
+                    if activeFilterCount > 0 {
                         HStack(spacing: 6) {
-                            Image(systemName: "slider.horizontal.3")
+                            Image(systemName: "line.3.horizontal.decrease.circle.fill")
                                 .font(.system(size: 14))
-                            Text("Filters")
-                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(Color("AppPrimaryColor"))
                             
-                            // Shows active filter count
-                            if activeFilterCount > 0 {
-                                Text("\(activeFilterCount)")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .frame(width: 22, height: 22)
-                                    .background(Color("AppPrimaryColor"))
-                                    .foregroundColor(.white)
-                                    .clipShape(Circle())
-                            }
+                            Text("\(activeFilterCount) active")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(Color("AppPrimaryColor"))
                         }
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 12)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(20)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 10)
                     }
                     
-                    // Active filter tags
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
                             if filters.priceFilter != .all {
@@ -328,8 +306,19 @@ struct EventsView: View {
                     }
                 }
             }
-            .navigationBarHidden(true)
-            .searchable(text: $searchText, prompt: "Search events")
+            .navigationTitle("Events")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        showingAddEventSheet = true
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(Color("AppPrimaryColor"))
+                    }
+                }
+            }
             .onAppear {
                 loadMockEvents()
                 loadUserProfile()
