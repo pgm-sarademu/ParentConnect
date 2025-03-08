@@ -121,221 +121,224 @@ struct EventsView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Custom title with profile button
-            HStack {
-                Text("Events")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                Spacer()
-                Button(action: {
-                    showingProfileView = true
-                }) {
-                    Image(systemName: "person")
-                        .foregroundColor(Color("AppPrimaryColor"))
-                        .font(.system(size: 24))
-                }
-            }
-            .padding(.horizontal)
-            .padding(.top, 5)
-            
-            // Custom search and filter bar
-            HStack {
-                // Search field
+        NavigationView {
+            VStack(spacing: 0) {
+                // Custom title with profile button
                 HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
-                    TextField("Search events", text: $searchText)
-                }
-                .padding(8)
-                .background(Color(.systemGray6))
-                .cornerRadius(10)
-                
-                // Filter button
-                Button(action: {
-                    showingFilters = true
-                }) {
-                    Image(systemName: "slider.horizontal.3")
-                        .font(.system(size: 18))
-                        .foregroundColor(Color("AppPrimaryColor"))
-                }
-                .padding(.leading, 8)
-                
-                // Add Event button (just + icon)
-                Button(action: {
-                    showingAddEventSheet = true
-                }) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(Color("AppPrimaryColor"))
-                }
-                .padding(.leading, 8)
-            }
-            .padding()
-            
-            // Active filter tags
-            HStack(spacing: 8) {
-                if activeFilterCount > 0 {
-                    HStack(spacing: 6) {
-                        Image(systemName: "line.3.horizontal.decrease.circle.fill")
-                            .font(.system(size: 14))
+                    Text("Events")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    Spacer()
+                    Button(action: {
+                        showingProfileView = true
+                    }) {
+                        Image(systemName: "person")
                             .foregroundColor(Color("AppPrimaryColor"))
-                        
-                        Text("\(activeFilterCount) active")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 24))
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.top, 5)
+                
+                // Custom search and filter bar
+                HStack {
+                    // Search field
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.secondary)
+                        TextField("Search events", text: $searchText)
+                    }
+                    .padding(8)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
+                    
+                    // Filter button
+                    Button(action: {
+                        showingFilters = true
+                    }) {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.system(size: 18))
                             .foregroundColor(Color("AppPrimaryColor"))
                     }
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 10)
+                    .padding(.leading, 8)
+                    
+                    // Add Event button (just + icon)
+                    Button(action: {
+                        showingAddEventSheet = true
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(Color("AppPrimaryColor"))
+                    }
+                    .padding(.leading, 8)
                 }
+                .padding()
                 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        if filters.priceFilter != .all {
-                            FilterTag(text: filters.priceFilter.rawValue) {
-                                filters.priceFilter = .all
+                // Active filter tags
+                HStack(spacing: 8) {
+                    if activeFilterCount > 0 {
+                        HStack(spacing: 6) {
+                            Image(systemName: "line.3.horizontal.decrease.circle.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(Color("AppPrimaryColor"))
+                            
+                            Text("\(activeFilterCount) active")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(Color("AppPrimaryColor"))
+                        }
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 10)
+                    }
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            if filters.priceFilter != .all {
+                                FilterTag(text: filters.priceFilter.rawValue) {
+                                    filters.priceFilter = .all
+                                }
+                            }
+                            
+                            if filters.ageFilter != "All Ages" {
+                                FilterTag(text: filters.ageFilter) {
+                                    filters.ageFilter = "All Ages"
+                                }
+                            }
+                            
+                            if filters.selectedDateRange != .all {
+                                FilterTag(text: filters.selectedDateRange.rawValue) {
+                                    filters.selectedDateRange = .all
+                                }
+                            }
+                            
+                            if filters.distanceFilter != .any {
+                                FilterTag(text: filters.distanceFilter.rawValue) {
+                                    filters.distanceFilter = .any
+                                }
+                            }
+                            
+                            if case let .customLocation(_, name) = filters.customLocation {
+                                FilterTag(text: "📍 \(name)") {
+                                    filters.customLocation = .currentLocation
+                                }
                             }
                         }
+                    }
+                    
+                    Spacer()
+                    
+                    if activeFilterCount > 0 {
+                        Button(action: {
+                            resetFilters()
+                        }) {
+                            Text("Clear")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.primary)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                
+                if filteredEvents.isEmpty {
+                    VStack(spacing: 20) {
+                        Spacer()
+                        Image(systemName: "calendar.badge.exclamationmark")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 70, height: 70)
+                            .foregroundColor(Color(.systemGray4))
                         
-                        if filters.ageFilter != "All Ages" {
-                            FilterTag(text: filters.ageFilter) {
-                                filters.ageFilter = "All Ages"
-                            }
-                        }
-                        
-                        if filters.selectedDateRange != .all {
-                            FilterTag(text: filters.selectedDateRange.rawValue) {
-                                filters.selectedDateRange = .all
-                            }
-                        }
-                        
-                        if filters.distanceFilter != .any {
-                            FilterTag(text: filters.distanceFilter.rawValue) {
-                                filters.distanceFilter = .any
-                            }
-                        }
+                        Text("No events found")
+                            .font(.headline)
                         
                         if case let .customLocation(_, name) = filters.customLocation {
-                            FilterTag(text: "📍 \(name)") {
-                                filters.customLocation = .currentLocation
-                            }
+                            Text("No events found in \(name)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        } else {
+                            Text("Try changing your filters or check back later")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
                         }
-                    }
-                }
-                
-                Spacer()
-                
-                if activeFilterCount > 0 {
-                    Button(action: {
-                        resetFilters()
-                    }) {
-                        Text("Clear")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.primary)
-                    }
-                }
-            }
-            .padding(.horizontal)
-            
-            if filteredEvents.isEmpty {
-                VStack(spacing: 20) {
-                    Spacer()
-                    Image(systemName: "calendar.badge.exclamationmark")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 70, height: 70)
-                        .foregroundColor(Color(.systemGray4))
-                    
-                    Text("No events found")
-                        .font(.headline)
-                    
-                    if case let .customLocation(_, name) = filters.customLocation {
-                        Text("No events found in \(name)")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    } else {
-                        Text("Try changing your filters or check back later")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
-                    
-                    Button(action: {
-                        resetFilters()
-                    }) {
-                        Text("Clear filters")
+                        
+                        Button(action: {
+                            resetFilters()
+                        }) {
+                            Text("Clear filters")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                                .background(Color("AppPrimaryColor"))
+                                .cornerRadius(20)
+                        }
+                        .padding(.top, 10)
+                        
+                        Button(action: {
+                            showingAddEventSheet = true
+                        }) {
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                Text("Create an Event")
+                            }
                             .font(.headline)
                             .foregroundColor(.white)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 10)
                             .background(Color("AppPrimaryColor"))
                             .cornerRadius(20)
-                    }
-                    .padding(.top, 10)
-                    
-                    Button(action: {
-                        showingAddEventSheet = true
-                    }) {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                            Text("Create an Event")
                         }
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color("AppPrimaryColor"))
-                        .cornerRadius(20)
-                    }
-                    .padding(.top, 10)
-                    
-                    Spacer()
-                }
-            } else {
-                // Display location header if using custom location
-                if case let .customLocation(_, name) = filters.customLocation {
-                    HStack {
-                        Image(systemName: "mappin.circle.fill")
-                            .foregroundColor(Color("AppPrimaryColor"))
-                        Text("Showing events near \(name)")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                        .padding(.top, 10)
+                        
                         Spacer()
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 4)
-                }
-                
-                // Event Grid Layout
-                ScrollView {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 165), spacing: 15)], spacing: 15) {
-                        ForEach(filteredEvents) { event in
-                            NavigationLink(destination: EnhancedEventDetailView(event: event)) {
-                                EventCardView(event: event)
+                } else {
+                    // Display location header if using custom location
+                    if case let .customLocation(_, name) = filters.customLocation {
+                        HStack {
+                            Image(systemName: "mappin.circle.fill")
+                                .foregroundColor(Color("AppPrimaryColor"))
+                            Text("Showing events near \(name)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 4)
+                    }
+                    
+                    // Event Grid Layout
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 165), spacing: 15)], spacing: 15) {
+                            ForEach(filteredEvents) { event in
+                                NavigationLink {
+                                    EnhancedEventDetailView(event: event)
+                                } label: {
+                                    EventCardView(event: event)
+                                }
                             }
                         }
+                        .padding(.horizontal)
+                        .padding(.vertical, 10)
                     }
-                    .padding(.horizontal)
-                    .padding(.vertical, 10)
                 }
             }
-        }
-        .navigationBarHidden(true)
-        .onAppear {
-            loadMockEvents()
-            loadUserProfile()
-        }
-        .sheet(isPresented: $showingAddEventSheet) {
-            AddEventView()
-        }
-        .sheet(isPresented: $showingFilters) {
-            EventFiltersView(filters: $filters, isPresented: $showingFilters)
-        }
-        .sheet(isPresented: $showingProfileView) {
-            Profile()
+            .onAppear {
+                loadMockEvents()
+                loadUserProfile()
+            }
+            .sheet(isPresented: $showingAddEventSheet) {
+                AddEventView()
+            }
+            .sheet(isPresented: $showingFilters) {
+                EventFiltersView(filters: $filters, isPresented: $showingFilters)
+            }
+            .sheet(isPresented: $showingProfileView) {
+                Profile()
+            }
         }
     }
     

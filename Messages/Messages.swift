@@ -7,100 +7,103 @@ struct MessagesView: View {
     @State private var showingProfileView = false
     
     var body: some View {
-        VStack {
-            // Custom title with profile button
-            HStack {
-                Text("Messages")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                Spacer()
-                Button(action: {
-                    showingProfileView = true
-                }) {
-                    Image(systemName: "person")
-                        .foregroundColor(Color("AppPrimaryColor"))
-                        .font(.system(size: 24))
-                }
-            }
-            .padding(.horizontal)
-            .padding(.top, 5)
-            
-            // No read receipts info banner
-            HStack {
-                Image(systemName: "info.circle.fill")
-                    .foregroundColor(Color("AppPrimaryColor"))
-                
-                Text("No read receipts - parents can respond when they have time")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
-            .background(Color("AppPrimaryColor").opacity(0.1))
-            .cornerRadius(8)
-            .padding(.horizontal)
-            
-            // Search bar
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
-                TextField("Search conversations", text: $searchText)
-            }
-            .padding(8)
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
-            .padding(.horizontal)
-            .padding(.vertical, 10)
-            
-            if conversations.isEmpty {
-                VStack(spacing: 15) {
+        NavigationView {
+            VStack {
+                // Custom title with profile button
+                HStack {
+                    Text("Messages")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
                     Spacer()
-                    Image(systemName: "message.circle")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 80, height: 80)
-                        .foregroundColor(Color(.systemGray4))
-                    
-                    Text("No conversations yet")
-                        .font(.headline)
-                    
-                    Text("Connect with parents to start chatting")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
                     Button(action: {
-                        // Navigate to home to find parents
+                        showingProfileView = true
                     }) {
-                        Text("Find Parents")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(Color("AppPrimaryColor"))
-                            .cornerRadius(20)
+                        Image(systemName: "person")
+                            .foregroundColor(Color("AppPrimaryColor"))
+                            .font(.system(size: 24))
                     }
-                    .padding(.top, 10)
-                    
-                    Spacer()
                 }
-                .padding()
-            } else {
-                List {
-                    ForEach(conversations) { conversation in
-                        NavigationLink(destination: ChatView(conversation: conversation)) {
-                            ConversationRow(conversation: conversation)
+                .padding(.horizontal)
+                .padding(.top, 5)
+                
+                // No read receipts info banner
+                HStack {
+                    Image(systemName: "info.circle.fill")
+                        .foregroundColor(Color("AppPrimaryColor"))
+                    
+                    Text("No read receipts - parents can respond when they have time")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .background(Color("AppPrimaryColor").opacity(0.1))
+                .cornerRadius(8)
+                .padding(.horizontal)
+                
+                // Search bar
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                    TextField("Search conversations", text: $searchText)
+                }
+                .padding(8)
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
+                .padding(.horizontal)
+                .padding(.vertical, 10)
+                
+                if conversations.isEmpty {
+                    VStack(spacing: 15) {
+                        Spacer()
+                        Image(systemName: "message.circle")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 80, height: 80)
+                            .foregroundColor(Color(.systemGray4))
+                        
+                        Text("No conversations yet")
+                            .font(.headline)
+                        
+                        Text("Connect with parents to start chatting")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        Button(action: {
+                            // Navigate to home to find parents
+                        }) {
+                            Text("Find Parents")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                                .background(Color("AppPrimaryColor"))
+                                .cornerRadius(20)
+                        }
+                        .padding(.top, 10)
+                        
+                        Spacer()
+                    }
+                    .padding()
+                } else {
+                    List {
+                        ForEach(conversations) { conversation in
+                            NavigationLink {
+                                ChatView(conversation: conversation)
+                            } label: {
+                                ConversationRow(conversation: conversation)
+                            }
                         }
                     }
+                    .listStyle(PlainListStyle())
                 }
-                .listStyle(PlainListStyle())
             }
-        }
-        .navigationBarHidden(true)
-        .onAppear {
-            loadMockConversations()
-        }
-        .sheet(isPresented: $showingProfileView) {
-            Profile()
+            .onAppear {
+                loadMockConversations()
+            }
+            .sheet(isPresented: $showingProfileView) {
+                Profile()
+            }
         }
     }
     
