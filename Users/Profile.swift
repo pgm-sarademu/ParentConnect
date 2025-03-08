@@ -169,12 +169,12 @@ struct Profile: View {
                         .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         .padding(.horizontal)
                         
-                        // My Created Events Button (NEW)
+                        // Created Events Button (NEW)
                         NavigationLink(destination: CreatedEvents()) {
                             HStack {
                                 Image(systemName: "calendar.badge.plus")
                                     .foregroundColor(.primary)
-                                Text("My Created Events")
+                                Text("Created Events")
                                     .foregroundColor(.primary)
                                 Spacer()
                                 Text("3 events")
@@ -190,14 +190,14 @@ struct Profile: View {
                         .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         .padding(.horizontal)
                         
-                        // My Connections Button
+                        // Connections Button
                         Button(action: {
                             // Navigate to connections view
                         }) {
                             HStack {
                                 Image(systemName: "person.2.fill")
                                     .foregroundColor(.primary)
-                                Text("My Connections")
+                                Text("Connections")
                                     .foregroundColor(.primary)
                                 Spacer()
                                 Text("5 parents")

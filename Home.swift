@@ -46,7 +46,6 @@ struct HomeView: View {
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.top, 5)
                     
                     // Map section
                     ZStack(alignment: .bottom) {
@@ -184,7 +183,7 @@ struct HomeView: View {
                         }
                     }
                 }
-                .padding(.vertical)
+                .padding(.bottom)
             }
             .onAppear {
                 loadMockData()
@@ -200,6 +199,7 @@ struct HomeView: View {
             .sheet(isPresented: $showingProfileView) {
                 Profile()
             }
+            .navigationBarHidden(true)
         }
     }
     
