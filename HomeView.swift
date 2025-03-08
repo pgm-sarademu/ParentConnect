@@ -143,35 +143,6 @@ struct HomeView: View {
                     }
                 }
                 
-                // Nearby parents section
-                VStack(alignment: .leading) {
-                    HStack {
-                        Text("Connect with Parents")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                        
-                        Spacer()
-                        
-                        Button(action: {
-                            // View all nearby parents
-                        }) {
-                            Text("See All")
-                                .font(.subheadline)
-                                .foregroundColor(Color("AppPrimaryColor"))
-                        }
-                    }
-                    .padding(.horizontal)
-                    
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 15) {
-                            ForEach(nearbyParents) { parent in
-                                ParentCard(parent: parent)
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                }
-                
                 // Spacer between sections
                 Spacer()
                     .frame(height: 20)
@@ -328,55 +299,6 @@ struct HomeView: View {
             ActivityPreview(id: "2", title: "Sensory Play Ideas", type: "Guide"),
             ActivityPreview(id: "3", title: "Letters Tracing Worksheet", type: "Printable")
         ]
-    }
-}
-
-// Parent Card Component
-struct ParentCard: View {
-    let parent: ParentPreview
-    
-    var body: some View {
-        VStack(alignment: .leading) {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.gray.opacity(0.3))
-                .frame(width: 160, height: 160)
-                .overlay(
-                    Text("👨‍👩‍👧‍👦")
-                        .font(.system(size: 50))
-                )
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(parent.name)
-                    .font(.headline)
-                
-                Text(parent.childrenInfo)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Text(parent.distance)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Button(action: {
-                    // Handle connect action
-                }) {
-                    Text("Connect")
-                        .font(.caption)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color("AppPrimaryColor"))
-                        .cornerRadius(20)
-                }
-                .padding(.top, 4)
-            }
-            .padding(8)
-        }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-        .frame(width: 160)
     }
 }
 
