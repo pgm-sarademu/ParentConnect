@@ -83,19 +83,21 @@ struct EventHistory: View {
                 }
                 Spacer()
             } else {
-                // List of past events
-                List {
-                    ForEach(pastEvents) { event in
-                        Button(action: {
-                            selectedEvent = event
-                            showingEventDetails = true
-                        }) {
-                            EventHistoryRow(event: event)
+                // Grid of past events
+                ScrollView {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 16)], spacing: 16) {
+                        ForEach(pastEvents) { event in
+                            Button(action: {
+                                selectedEvent = event
+                                showingEventDetails = true
+                            }) {
+                                EventHistoryCard(event: event)
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
-                        .listRowSeparator(.hidden)
                     }
+                    .padding()
                 }
-                .listStyle(PlainListStyle())
             }
         }
         .navigationTitle("Event History")
@@ -214,94 +216,91 @@ struct EventHistoryItem: Identifiable {
     let imageEmoji: String
 }
 
-struct EventHistoryRow: View {
+// New grid card view for event history
+struct EventHistoryCard: View {
     let event: EventHistoryItem
     
     var body: some View {
-        HStack(spacing: 15) {
-            // Date column
-            VStack(spacing: 2) {
-                Text(formatDay(event.date))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: 0) {
+            // Event image with date overlay
+            ZStack(alignment: .bottomLeading) {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .aspectRatio(1.2, contentMode: .fit)
+                    .overlay(
+                        Text(event.imageEmoji)
+                            .font(.system(size: 40))
+                    )
                 
-                Text(formatDayNumber(event.date))
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("AppPrimaryColor"))
-                
-                Text(formatMonth(event.date))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                // Date badge overlay
+                HStack(spacing: 4) {
+                    VStack(spacing: 0) {
+                        Text(formatDay(event.date))
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                        
+                        Text(formatDayNumber(event.date))
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            
+                        Text(formatMonth(event.date))
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color("AppPrimaryColor"))
+                    .cornerRadius(8)
+                }
+                .padding(8)
             }
-            .frame(width: 50)
-            .padding(.vertical, 8)
-            .background(Color("AppPrimaryColor").opacity(0.1))
-            .cornerRadius(8)
             
-            // Event info
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(event.title)
-                    .font(.headline)
+                    .font(.system(size: 16, weight: .semibold))
                     .lineLimit(1)
                 
                 HStack {
-                    Image(systemName: "location")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(Color("AppPrimaryColor").opacity(0.7))
                     
                     Text(event.location)
-                        .font(.subheadline)
+                        .font(.system(size: 12))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
                 
-                // Connection info
-                HStack(spacing: 4) {
-                    Image(systemName: "person.2")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                // Attendee info
+                HStack {
+                    Image(systemName: "person.2.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(Color("AppPrimaryColor").opacity(0.7))
                     
                     Text("\(event.totalAttendees) attendees")
-                        .font(.caption)
+                        .font(.system(size: 12))
                         .foregroundColor(.secondary)
-                    
-                    if event.connectionsMade > 0 {
-                        Text("•")
-                            .foregroundColor(.secondary)
+                }
+                
+                // Connection info if any
+                if event.connectionsMade > 0 {
+                    HStack {
+                        Image(systemName: "link.circle.fill")
+                            .font(.system(size: 10))
+                            .foregroundColor(Color("AppPrimaryColor"))
                         
                         Text("\(event.connectionsMade) connections")
-                            .font(.caption)
+                            .font(.system(size: 12))
                             .foregroundColor(Color("AppPrimaryColor"))
                             .fontWeight(.medium)
                     }
                 }
             }
-            
-            Spacer()
-            
-            // Event image
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(width: 50, height: 50)
-                
-                Text(event.imageEmoji)
-                    .font(.title)
-            }
+            .padding(10)
         }
-        .padding()
         .background(Color(.systemBackground))
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
-        .padding(.vertical, 4)
-        .padding(.horizontal, 8)
-    }
-    
-    private func formatMonth(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM"
-        return formatter.string(from: date)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
     
     private func formatDay(_ date: Date) -> String {
@@ -313,6 +312,12 @@ struct EventHistoryRow: View {
     private func formatDayNumber(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "d"
+        return formatter.string(from: date)
+    }
+    
+    private func formatMonth(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM"
         return formatter.string(from: date)
     }
 }
@@ -524,10 +529,10 @@ struct PastEventDetail: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             // In a real app, fetch this data from Core Data or your backend API
             self.attendees = [
-                AttendeeInfo(id: "1", name: "Sarah Johnson", childrenInfo: "2 kids (4, 6)", childCount: 2, isConnected: event.connectionsMade > 0),
-                AttendeeInfo(id: "2", name: "Mike Thompson", childrenInfo: "1 kid (3)", childCount: 1, isConnected: event.connectionsMade > 1),
-                AttendeeInfo(id: "3", name: "Emma Roberts", childrenInfo: "3 kids (2, 5, 7)", childCount: 3, isConnected: event.connectionsMade > 2),
-                AttendeeInfo(id: "4", name: "David Wilson", childrenInfo: "2 kids (4, 8)", childCount: 2, isConnected: event.connectionsMade > 3)
+                AttendeeInfo(id: "1", name: "Sarah Johnson", childrenInfo: "2 kids (4, 6)", childCount: 2, isConnected: self.event.connectionsMade > 0),
+                AttendeeInfo(id: "2", name: "Mike Thompson", childrenInfo: "1 kid (3)", childCount: 1, isConnected: self.event.connectionsMade > 1),
+                AttendeeInfo(id: "3", name: "Emma Roberts", childrenInfo: "3 kids (2, 5, 7)", childCount: 3, isConnected: self.event.connectionsMade > 2),
+                AttendeeInfo(id: "4", name: "David Wilson", childrenInfo: "2 kids (4, 8)", childCount: 2, isConnected: self.event.connectionsMade > 3)
             ]
             
             self.isLoading = false
