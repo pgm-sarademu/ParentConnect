@@ -116,8 +116,8 @@ struct EventsView: View {
             }
         }
         
-        // Sort by location proximity and age relevance (instead of just date)
-        return sortByRelevance(events: filtered)
+        // Sort by date, location proximity, and child age relevance
+        return dateBasedSort(filtered)
     }
     
     var body: some View {
@@ -138,27 +138,6 @@ struct EventsView: View {
             }
             .padding(.horizontal)
             .padding(.top, 5)
-            
-            // Add Event button below title
-            HStack {
-                Spacer()
-                Button(action: {
-                    showingAddEventSheet = true
-                }) {
-                    HStack {
-                        Image(systemName: "plus.circle.fill")
-                        Text("Create Event")
-                    }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 16)
-                    .background(Color("AppPrimaryColor"))
-                    .foregroundColor(.white)
-                    .cornerRadius(20)
-                }
-            }
-            .padding(.horizontal)
-            .padding(.top, 5)
-            .padding(.bottom, 10)
             
             // Custom search and filter bar
             HStack {
@@ -183,6 +162,26 @@ struct EventsView: View {
                 .padding(.leading, 8)
             }
             .padding()
+            
+            // Add Event button below search bar
+            HStack {
+                Spacer()
+                Button(action: {
+                    showingAddEventSheet = true
+                }) {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Create Event")
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 16)
+                    .background(Color("AppPrimaryColor"))
+                    .foregroundColor(.white)
+                    .cornerRadius(20)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 10)
             
             // Active filter tags
             HStack(spacing: 8) {
@@ -308,7 +307,7 @@ struct EventsView: View {
             } else {
                 // Display info about sorting at the top
                 HStack {
-                    Text("Events sorted by location and child age relevance")
+                    Text("Events sorted by date, location and child age relevance")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
@@ -377,75 +376,17 @@ struct EventsView: View {
     // Load user profile data
     private func loadUserProfile() {
         // In a real app, this would come from Core Data or user preferences
-        // For demo, we'll use mock data
         userChildAges = [4, 6]
     }
     
-    // Calculate a relevance score for each event
-    private func calculateRelevanceScore(for event: EventPreview) -> Double {
-        var score = 0.0
-        
-        // 1. Location proximity (0-100 points)
-        let distance = getDistanceToEvent(event)
-        
-        // Closer events get higher scores
-        if distance < 1.0 {
-            score += 100 // Very close
-        } else if distance < 3.0 {
-            score += 80
-        } else if distance < 5.0 {
-            score += 60
-        } else if distance < 10.0 {
-            score += 40
-        } else if distance < 20.0 {
-            score += 20
-        }
-        
-        // 2. Age relevance (0-100 points)
-        // In a real app, parse age ranges from the event
-        // For demo, use the event ID to simulate age ranges
-        let idNumber = Int(event.id) ?? 0
-        let eventAgeMin = (idNumber % 15) + 1 // 1-15 years
-        let eventAgeMax = eventAgeMin + 3
-        
-        // Check how well user's children's ages match the event's age range
-        for childAge in userChildAges {
-            if childAge >= eventAgeMin && childAge <= eventAgeMax {
-                // Perfect age match
-                score += 100 / Double(userChildAges.count)
-            } else if abs(childAge - eventAgeMin) <= 1 || abs(childAge - eventAgeMax) <= 1 {
-                // Close age match (within 1 year)
-                score += 60 / Double(userChildAges.count)
-            } else if abs(childAge - eventAgeMin) <= 2 || abs(childAge - eventAgeMax) <= 2 {
-                // Somewhat close (within 2 years)
-                score += 30 / Double(userChildAges.count)
-            }
-        }
-        
-        // 3. Date relevance (0-50 points)
-        // Events happening soon get higher scores
-        let daysUntilEvent = daysBetween(Date(), event.date)
-        if daysUntilEvent == 0 {
-            score += 50 // Today
-        } else if daysUntilEvent <= 2 {
-            score += 40 // Next couple days
-        } else if daysUntilEvent <= 7 {
-            score += 30 // This week
-        } else if daysUntilEvent <= 14 {
-            score += 20 // Next 2 weeks
-        } else if daysUntilEvent <= 30 {
-            score += 10 // This month
-        }
-        
-        return score
-    }
-    
-    // Sort events by their relevance score
-    private func sortByRelevance(events: [EventPreview]) -> [EventPreview] {
-        return events.sorted { (event1, event2) -> Bool in
-            let score1 = calculateRelevanceScore(for: event1)
-            let score2 = calculateRelevanceScore(for: event2)
-            return score1 > score2
+    // Date-based sorting (simplified)
+    private func dateBasedSort(_ events: [EventPreview]) -> [EventPreview] {
+        events.sorted { e1, e2 in
+            let days1 = daysBetween(Date(), e1.date)
+            let days2 = daysBetween(Date(), e2.date)
+            
+            // Events happening sooner come first
+            return days1 < days2
         }
     }
     
@@ -456,37 +397,18 @@ struct EventsView: View {
         return components.day ?? 0
     }
     
-    // Get distance to event
-    private func getDistanceToEvent(_ event: EventPreview) -> Double {
-        guard let userLocation = locationManager.location else {
-            return 100.0 // Default large distance if location unknown
-        }
-        
-        // In a real app, you would use real event coordinates
-        // For demo, create mock coordinates
-        let coordinates = getMockCoordinates(for: event)
-        let eventLocation = CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude)
-        
-        // Calculate distance in miles
-        let distanceInMeters = userLocation.distance(from: eventLocation)
-        return distanceInMeters * 0.000621371 // Convert meters to miles
-    }
-    
     // Create mock coordinates for distance calculations
     private func getMockCoordinates(for event: EventPreview) -> CLLocationCoordinate2D {
-        // In a real app, each event would have its own coordinates
-        // For this demo, we'll just simulate different coordinates based on the event ID
-        
-        // Base coordinates - roughly around user's location
+        // Base coordinates
         let baseLatitude = locationManager.location?.coordinate.latitude ?? 37.7749
         let baseLongitude = locationManager.location?.coordinate.longitude ?? -122.4194
         
-        // Create a deterministic "random" offset based on the event ID
+        // Simple offset based on event ID
         let idHash = event.id.hash
         let latitudeOffset = Double(abs(idHash % 100)) * 0.0003
         let longitudeOffset = Double(abs((idHash / 100) % 100)) * 0.0003
         
-        // Use XOR to determine direction
+        // Direction
         let latSign = (idHash & 1) == 0 ? 1.0 : -1.0
         let lonSign = (idHash & 2) == 0 ? 1.0 : -1.0
         
