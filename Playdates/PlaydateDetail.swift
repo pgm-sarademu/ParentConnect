@@ -8,9 +8,12 @@ struct PlaydateDetail: View {
     @State private var showingShareSheet = false
     @State private var showingAttendees = false
     @State private var showingChatView = false
+    @State private var showingToast = false
+    @State private var toastMessage = ""
     
     // Mock data
     let attendeeCount = Int.random(in: 2...8)
+    @State private var unreadMessages = Int.random(in: 0...5)
     
     // Sample description
     let playdateDescription = "Join us for a casual playdate at the park! Kids can play on the playground equipment while parents chat and get to know each other. Feel free to bring snacks and drinks. All parents should stay with their children during the playdate. Looking forward to meeting everyone!"
@@ -117,6 +120,11 @@ struct PlaydateDetail: View {
                     HStack {
                         Button(action: {
                             isAttending.toggle()
+                            
+                            // If the user is now attending, add them to the playdate chat
+                            if isAttending {
+                                addUserToPlaydateChat()
+                            }
                         }) {
                             HStack {
                                 Image(systemName: isAttending ? "checkmark.circle.fill" : "circle")
@@ -175,13 +183,16 @@ struct PlaydateDetail: View {
                                 Text("Group Chat")
                                     .foregroundColor(Color("AppPrimaryColor"))
                                 Spacer()
-                                Text("3 new messages")
-                                    .font(.caption)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color("AppPrimaryColor"))
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
+                                
+                                if unreadMessages > 0 {
+                                    Text("\(unreadMessages) new")
+                                        .font(.caption)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color("AppPrimaryColor"))
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                }
                             }
                             .padding()
                             .background(Color("AppPrimaryColor").opacity(0.1))
@@ -252,6 +263,29 @@ struct PlaydateDetail: View {
                 }
                 .padding()
             }
+            
+            // Toast message overlay
+            if showingToast {
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.white)
+                        
+                        Text(toastMessage)
+                            .foregroundColor(.white)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                    .background(Color("AppPrimaryColor").opacity(0.9))
+                    .cornerRadius(8)
+                    .padding(.bottom, 50)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
         }
         .edgesIgnoringSafeArea(.top)
         .navigationBarTitleDisplayMode(.inline)
@@ -267,6 +301,48 @@ struct PlaydateDetail: View {
                 .foregroundColor(Color("AppPrimaryColor"))
             }
         )
+        .onAppear(perform: checkAttendanceStatus)
+        .sheet(isPresented: $showingChatView) {
+            NavigationView {
+                GroupChat(eventId: playdate.id, eventTitle: playdate.title)
+            }
+        }
+    }
+    
+    private func checkAttendanceStatus() {
+        // This would load from UserDefaults or Core Data in a real app
+        let attendingPlaydates = UserDefaults.standard.dictionary(forKey: "UserAttendingPlaydates") as? [String: Bool] ?? [:]
+        isAttending = attendingPlaydates[playdate.id] == true
+    }
+    
+    private func addUserToPlaydateChat() {
+        // Update attendance status
+        var attendingPlaydates = UserDefaults.standard.dictionary(forKey: "UserAttendingPlaydates") as? [String: Bool] ?? [:]
+        attendingPlaydates[playdate.id] = true
+        UserDefaults.standard.set(attendingPlaydates, forKey: "UserAttendingPlaydates")
+        
+        // Create an entry in UserDefaults to track playdate chats
+        var playdateChats = UserDefaults.standard.dictionary(forKey: "UserPlaydateChats") as? [String: Bool] ?? [:]
+        playdateChats[playdate.id] = true
+        UserDefaults.standard.set(playdateChats, forKey: "UserPlaydateChats")
+        
+        // Update unread count to 0 since the user just joined
+        var playdateChatUnread = UserDefaults.standard.dictionary(forKey: "PlaydateChatUnread") as? [String: Int] ?? [:]
+        playdateChatUnread[playdate.id] = 0
+        UserDefaults.standard.set(playdateChatUnread, forKey: "PlaydateChatUnread")
+        
+        // Show toast message
+        toastMessage = "Added to playdate chat. Check the Messages tab to participate!"
+        withAnimation {
+            showingToast = true
+        }
+        
+        // Hide the toast after a delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+            withAnimation {
+                showingToast = false
+            }
+        }
     }
     
     private func formatFullDate(_ date: Date) -> String {

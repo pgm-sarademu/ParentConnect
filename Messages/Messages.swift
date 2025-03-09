@@ -4,9 +4,10 @@ import CoreData
 struct MessagesView: View {
     @State private var conversations: [ConversationPreview] = []
     @State private var eventChats: [EventChatPreview] = []
+    @State private var playdateChats: [EventChatPreview] = [] // Added playdate chats
     @State private var searchText = ""
     @State private var showingProfileView = false
-    @State private var selectedTab = 0 // 0 = Direct, 1 = Groups
+    @State private var selectedTab = 0 // 0 = Direct, 1 = Groups, 2 = Playdates (new)
     
     var body: some View {
         NavigationView {
@@ -43,10 +44,11 @@ struct MessagesView: View {
                 .cornerRadius(8)
                 .padding(.horizontal)
                 
-                // Tab selector for Direct vs Group chats
+                // Tab selector for Direct, Event, and Playdate chats
                 Picker("Chat Type", selection: $selectedTab) {
                     Text("Direct").tag(0)
                     Text("Event Chats").tag(1)
+                    Text("Playdate Chats").tag(2) // Added Playdate Chats tab
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal)
@@ -111,7 +113,7 @@ struct MessagesView: View {
                         }
                         .listStyle(PlainListStyle())
                     }
-                } else {
+                } else if selectedTab == 1 {
                     // Event chats tab
                     if eventChats.isEmpty {
                         VStack(spacing: 15) {
@@ -156,11 +158,57 @@ struct MessagesView: View {
                         }
                         .listStyle(PlainListStyle())
                     }
+                } else {
+                    // Playdate chats tab
+                    if playdateChats.isEmpty {
+                        VStack(spacing: 15) {
+                            Spacer()
+                            Image(systemName: "bubble.left.and.bubble.right")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 80, height: 80)
+                                .foregroundColor(Color(.systemGray4))
+                            
+                            Text("No playdate chats")
+                                .font(.headline)
+                            
+                            Text("Join playdates to participate in group chats")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            NavigationLink(destination: Playdates()) {
+                                Text("Browse Playdates")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 10)
+                                    .background(Color("AppPrimaryColor"))
+                                    .cornerRadius(20)
+                            }
+                            .padding(.top, 10)
+                            
+                            Spacer()
+                        }
+                        .padding()
+                    } else {
+                        // Playdate chats list
+                        List {
+                            ForEach(filteredPlaydateChats) { playdateChat in
+                                NavigationLink {
+                                    GroupChat(eventId: playdateChat.eventId, eventTitle: playdateChat.eventTitle)
+                                } label: {
+                                    EventChatRow(eventChat: playdateChat) // Reusing the same row component
+                                }
+                            }
+                        }
+                        .listStyle(PlainListStyle())
+                    }
                 }
             }
             .onAppear {
                 loadMockConversations()
                 loadUserEventChats()
+                loadUserPlaydateChats() // Added for playdate chats
             }
             .sheet(isPresented: $showingProfileView) {
                 Profile()
@@ -186,6 +234,18 @@ struct MessagesView: View {
             return eventChats
         } else {
             return eventChats.filter {
+                $0.eventTitle.localizedCaseInsensitiveContains(searchText) ||
+                $0.lastMessage.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
+    
+    // Apply search filter to playdate chats
+    var filteredPlaydateChats: [EventChatPreview] {
+        if searchText.isEmpty {
+            return playdateChats
+        } else {
+            return playdateChats.filter {
                 $0.eventTitle.localizedCaseInsensitiveContains(searchText) ||
                 $0.lastMessage.localizedCaseInsensitiveContains(searchText)
             }
@@ -279,6 +339,69 @@ struct MessagesView: View {
         
         // Sort chats by timestamp, most recent first
         eventChats = chats.sorted { $0.timestamp > $1.timestamp }
+    }
+    
+    private func loadUserPlaydateChats() {
+        // Check UserDefaults for playdates the user has joined
+        let userPlaydateChats = UserDefaults.standard.dictionary(forKey: "UserPlaydateChats") as? [String: Bool] ?? [:]
+        let playdateChatUnread = UserDefaults.standard.dictionary(forKey: "PlaydateChatUnread") as? [String: Int] ?? [:]
+        let playdateChatsLastMessage = UserDefaults.standard.dictionary(forKey: "PlaydateChatsLastMessage") as? [String: String] ?? [:]
+        let playdateChatsTimestamp = UserDefaults.standard.dictionary(forKey: "PlaydateChatsTimestamp") as? [String: Double] ?? [:]
+        
+        // For demo purposes, create some mock playdate chats
+        let mockPlaydates = [
+            ("101", "Playground Meetup"),
+            ("202", "Swimming Pool Fun"),
+            ("303", "Library Play Corner"),
+            ("404", "Nature Walk & Play"),
+            ("505", "Indoor Playground Meetup")
+        ]
+        
+        var chats: [EventChatPreview] = []
+        
+        for (playdateId, playdateTitle) in mockPlaydates {
+            // Check if user has joined this playdate's chat or if we should create a mock entry
+            if userPlaydateChats[playdateId] == true || (playdateId == "101" || playdateId == "202") {
+                // If we don't have UserDefaults data for this chat yet, set some defaults
+                if userPlaydateChats[playdateId] != true {
+                    // Mark this playdate as joined
+                    var updatedChats = userPlaydateChats
+                    updatedChats[playdateId] = true
+                    UserDefaults.standard.set(updatedChats, forKey: "UserPlaydateChats")
+                }
+                
+                // Get or set unread count
+                let unreadCount = playdateChatUnread[playdateId] ?? Int.random(in: 0...5)
+                
+                // Get or set last message
+                let lastMessage = playdateChatsLastMessage[playdateId] ?? getRandomLastMessage()
+                
+                // Get or set timestamp
+                let timestamp: Date
+                if let storedTimestamp = playdateChatsTimestamp[playdateId] {
+                    timestamp = Date(timeIntervalSince1970: storedTimestamp)
+                } else {
+                    timestamp = Date().addingTimeInterval(Double(-3600 * Int.random(in: 1...72)))
+                    
+                    // Save the generated timestamp
+                    var updatedTimestamps = playdateChatsTimestamp
+                    updatedTimestamps[playdateId] = timestamp.timeIntervalSince1970
+                    UserDefaults.standard.set(updatedTimestamps, forKey: "PlaydateChatsTimestamp")
+                }
+                
+                chats.append(EventChatPreview(
+                    eventId: playdateId,
+                    eventTitle: playdateTitle,
+                    lastMessage: lastMessage,
+                    participantCount: Int.random(in: 3...12),
+                    timestamp: timestamp,
+                    unreadCount: unreadCount
+                ))
+            }
+        }
+        
+        // Sort chats by timestamp, most recent first
+        playdateChats = chats.sorted { $0.timestamp > $1.timestamp }
     }
     
     private func getRandomLastMessage() -> String {
