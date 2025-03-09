@@ -14,6 +14,7 @@ struct AddEventView: View {
     @State private var price: String = ""
     @State private var ageRange = ""
     @State private var privacyOption = 0 // 0=Public, 1=Friends, 2=Private
+    @State private var organizerName = ""
     
     // Participant limits
     @State private var hasParticipantLimit = false
@@ -28,16 +29,28 @@ struct AddEventView: View {
         NavigationView {
             Form {
                 Section(header: Text("Event Details")) {
-                    TextField("Event Title", text: $title)
-                    TextField("Location", text: $location)
+                    TextField("Event Title (e.g., Kids Yoga Class)", text: $title)
+                    TextField("Location (e.g., Community Center)", text: $location)
                     DatePicker("Date & Time", selection: $date)
                     TextField("Age Range (e.g., 3-5 years)", text: $ageRange)
                         .keyboardType(.default)
+                    TextField("Organizer/Host Name", text: $organizerName)
                 }
                 
                 Section(header: Text("Description")) {
                     TextEditor(text: $description)
                         .frame(minHeight: 100)
+                        .overlay(
+                            Group {
+                                if description.isEmpty {
+                                    Text("Describe your event... (e.g., A structured yoga class designed for children to improve flexibility and focus. Mats will be provided. Each session is 45 minutes long.)")
+                                        .foregroundColor(.gray)
+                                        .padding(.horizontal, 4)
+                                        .padding(.vertical, 8)
+                                        .allowsHitTesting(false)
+                                }
+                            }
+                        )
                 }
                 
                 Section(header: Text("Privacy")) {
@@ -82,7 +95,7 @@ struct AddEventView: View {
                         .cornerRadius(10)
                 }
             }
-            .navigationTitle("Create Event")
+            .navigationTitle("Create Structured Event")
             .navigationBarItems(leading: Button("Cancel") {
                 presentationMode.wrappedValue.dismiss()
             })

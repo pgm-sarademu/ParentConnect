@@ -75,6 +75,11 @@
 			path = Activities;
 			sourceTree = "<group>";
 		};
+		56AB36902D7DC59F006A471B /* Playdates */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Playdates;
+			sourceTree = "<group>";
+		};
 		56C328D02D723EAB005E6E8C /* ParentConnect */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -124,6 +129,7 @@
 			isa = PBXGroup;
 			children = (
 				56AB34332D743AE7006A471B /* Home.swift */,
+				56AB36902D7DC59F006A471B /* Playdates */,
 				56AB35D92D7CBAFD006A471B /* Users */,
 				56AB350A2D7836FC006A471B /* Messages */,
 				56AB35042D78328C006A471B /* Events */,
@@ -170,6 +176,7 @@
 				56AB350A2D7836FC006A471B /* Messages */,
 				56AB35D92D7CBAFD006A471B /* Users */,
 				56AB35DA2D7CBB19006A471B /* Activities */,
+				56AB36902D7DC59F006A471B /* Playdates */,
 				56C328D02D723EAB005E6E8C /* ParentConnect */,
 			);
 			name = ParentConnect;

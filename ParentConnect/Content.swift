@@ -32,12 +32,19 @@ struct ContentView: View {
                     }
                     .tag(2)
                 
+                // Playdates tab (new)
+                Playdates()
+                    .tabItem {
+                        Label("Playdates", systemImage: "figure.2.and.child.holdinghands")
+                    }
+                    .tag(3)
+                
                 // Activities tab
                 Activities()
                     .tabItem {
                         Label("Activities", systemImage: "doc.fill")
                     }
-                    .tag(3)
+                    .tag(4)
             }
             .accentColor(Color("AppPrimaryColor"))
         } else {

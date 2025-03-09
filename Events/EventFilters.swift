@@ -154,7 +154,7 @@ struct EventFiltersView: View {
     @State private var tempFilters: EventFilters
     @State private var showingLocationSearch = false
     @State private var searchQuery = ""
-    @State private var searchResults: [LocationSearchResult] = []
+    @State private var searchResults: [EventLocationSearchResult] = []
     @EnvironmentObject var locationManager: LocationManager
     
     // Common age ranges for kids' activities
@@ -404,7 +404,8 @@ struct EventFiltersView: View {
     }
 }
 
-struct LocationSearchResult: Identifiable {
+// Using a uniquely named struct to avoid conflicts
+struct EventLocationSearchResult: Identifiable {
     let id = UUID()
     let name: String
     let address: String
@@ -415,7 +416,7 @@ struct LocationSearchView: View {
     @Environment(\.presentationMode) var presentationMode
     @Binding var customLocation: EventFilters.LocationOption
     @Binding var searchQuery: String
-    @Binding var searchResults: [LocationSearchResult]
+    @Binding var searchResults: [EventLocationSearchResult]
     let locationManager: LocationManager
     
     var body: some View {
@@ -499,7 +500,7 @@ struct LocationSearchView: View {
             }
             
             searchResults = response.mapItems.map { item in
-                LocationSearchResult(
+                EventLocationSearchResult(
                     name: item.name ?? "Unknown Location",
                     address: parseAddress(from: item.placemark),
                     coordinate: item.placemark.coordinate
@@ -526,7 +527,7 @@ struct LocationSearchView: View {
         return addressComponents.joined(separator: ", ")
     }
     
-    private func selectLocation(_ result: LocationSearchResult) {
+    private func selectLocation(_ result: EventLocationSearchResult) {
         let location = CLLocation(latitude: result.coordinate.latitude, longitude: result.coordinate.longitude)
         customLocation = .customLocation(location, "\(result.name), \(result.address)")
         presentationMode.wrappedValue.dismiss()
