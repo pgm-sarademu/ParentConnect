@@ -1,7 +1,7 @@
 import SwiftUI
 import CoreData
 
-struct EnhancedEventDetailView: View {
+struct EventDetail: View {
     let event: EventPreview
     @State private var isAttending = false
     @State private var showingShareSheet = false
@@ -17,6 +17,10 @@ struct EnhancedEventDetailView: View {
     @State private var limitDescription = ""
     @State private var participantCount = 0
     @State private var childrenCount = 0
+    
+    // Group chat state variables
+    @State private var showingGroupChat = false
+    @State private var unreadMessages = 2 // In a real app, this would be fetched from data model
     
     var body: some View {
         ScrollView {
@@ -207,6 +211,27 @@ struct EnhancedEventDetailView: View {
                         .cornerRadius(10)
                     }
                     
+                    // Group chat button
+                    Button(action: {
+                        showingGroupChat = true
+                    }) {
+                        HStack {
+                            Image(systemName: "bubble.left.and.bubble.right.fill")
+                            Text("Event Chat")
+                            Spacer()
+                            if unreadMessages > 0 {
+                                Text("\(unreadMessages) new")
+                                    .font(.caption)
+                                    .foregroundColor(Color("AppPrimaryColor"))
+                            }
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                    }
+                    
                     Divider()
                     
                     // Map preview
@@ -262,6 +287,12 @@ struct EnhancedEventDetailView: View {
                 EventParticipantView(eventId: event.id)
             }
         }
+        // Sheet for group chat
+        .sheet(isPresented: $showingGroupChat) {
+            NavigationView {
+                GroupChat(eventId: event.id, eventTitle: event.title)
+            }
+        }
     }
     
     private func loadEventDetails() {
@@ -311,6 +342,10 @@ struct EnhancedEventDetailView: View {
         // In a real app, you would get this from the Event entity
         isPaid = false
         price = "0.00"
+        
+        // Load unread message count for group chat
+        // In a real app, this would be fetched from your data store
+        unreadMessages = Int.random(in: 0...5)
     }
     
     private func formatFullDate(_ date: Date) -> String {

@@ -315,7 +315,7 @@ struct EventsView: View {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 165), spacing: 15)], spacing: 15) {
                             ForEach(filteredEvents) { event in
                                 NavigationLink {
-                                    EnhancedEventDetailView(event: event)
+                                    EventDetail(event: event)
                                 } label: {
                                     EventCardView(event: event)
                                 }
@@ -486,6 +486,11 @@ struct EventsView: View {
 struct EventCardView: View {
     let event: EventPreview
     
+    // In a real app, these would be calculated from your data model
+    let hasActiveChat: Bool = Bool.random() // Randomly show chat indicator in preview
+    let chatParticipantCount: Int = Int.random(in: 2...15)
+    let unreadChatMessages: Int = Int.random(in: 0...5)
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Event image with date overlay
@@ -549,10 +554,31 @@ struct EventCardView: View {
                         .font(.system(size: 10))
                         .foregroundColor(Color("AppPrimaryColor").opacity(0.7))
                     
+                    // Generate a simulated age range based on event ID
                     let minAge = (Int(event.id) ?? 0) % 15 + 1
                     Text("Ages \(minAge)-\(minAge+3)")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
+                }
+                
+                // Chat information row
+                if hasActiveChat {
+                    HStack {
+                        Image(systemName: "bubble.left.and.bubble.right.fill")
+                            .font(.system(size: 10))
+                            .foregroundColor(Color("AppPrimaryColor"))
+                        
+                        Text("\(chatParticipantCount) in chat")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color("AppPrimaryColor"))
+                        
+                        if unreadChatMessages > 0 {
+                            Text("• \(unreadChatMessages) new")
+                                .font(.system(size: 12))
+                                .foregroundColor(Color("AppPrimaryColor"))
+                                .fontWeight(.medium)
+                        }
+                    }
                 }
             }
             .padding(10)

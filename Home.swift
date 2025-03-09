@@ -134,7 +134,7 @@ struct HomeView: View {
                             HStack(spacing: 15) {
                                 ForEach(upcomingEvents) { event in
                                     NavigationLink {
-                                        EnhancedEventDetailView(event: event)
+                                        EventDetail(event: event)
                                     } label: {
                                         HomeEventCard(event: event)
                                             .foregroundColor(.primary)

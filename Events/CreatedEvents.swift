@@ -44,7 +44,7 @@ struct CreatedEvents: View {
             } else {
                 List {
                     ForEach(createdEvents) { event in
-                        NavigationLink(destination: EnhancedEventDetailView(event: event)) {
+                        NavigationLink(destination: EventDetail(event: event)) {
                             CreatedEventRow(event: event)
                         }
                         .swipeActions(edge: .trailing) {
@@ -119,9 +119,6 @@ struct CreatedEvents: View {
         // In a real app, you would:
         // 1. Delete from Core Data
         // 2. Sync with server if needed
-        
-        // For demo, we just remove from the local array
-        // No additional code needed since we already updated the array above
     }
 }
 
@@ -192,5 +189,30 @@ struct CreatedEventRow: View {
                     .cornerRadius(10)
             }
         }
+    }
+    
+    // Add date formatting functions here
+    private func formatDay(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE"
+        return formatter.string(from: date)
+    }
+    
+    private func formatDayNumber(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d"
+        return formatter.string(from: date)
+    }
+    
+    private func formatMonth(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM"
+        return formatter.string(from: date)
+    }
+    
+    private func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }

@@ -2,7 +2,7 @@ import SwiftUI
 import MapKit
 import CoreLocation
 
-struct NearbyEventsView: View {
+struct NearbyEvents: View {
     @EnvironmentObject var locationManager: LocationManager
     @State private var nearbyEvents: [EventPreview] = []
     @State private var isLoading = true
@@ -33,7 +33,7 @@ struct NearbyEventsView: View {
                 List {
                     Section(header: Text("Events Near You")) {
                         ForEach(nearbyEvents) { event in
-                            NavigationLink(destination: EnhancedEventDetailView(event: event)) {
+                            NavigationLink(destination: EventDetail(event: event)) {
                                 EventDistanceRow(event: event, distance: distanceToEvent(event))
                             }
                             .listRowSeparator(.hidden)
