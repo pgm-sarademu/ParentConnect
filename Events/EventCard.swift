@@ -77,26 +77,6 @@ struct EventCard: View {
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                 }
-                
-                // Chat information row
-                if hasActiveChat {
-                    HStack {
-                        Image(systemName: "bubble.left.and.bubble.right.fill")
-                            .font(.system(size: 10))
-                            .foregroundColor(Color("AppPrimaryColor"))
-                        
-                        Text("\(chatParticipantCount) in chat")
-                            .font(.system(size: 12))
-                            .foregroundColor(Color("AppPrimaryColor"))
-                        
-                        if unreadChatMessages > 0 {
-                            Text("• \(unreadChatMessages) new")
-                                .font(.system(size: 12))
-                                .foregroundColor(Color("AppPrimaryColor"))
-                                .fontWeight(.medium)
-                        }
-                    }
-                }
             }
             .padding(10)
         }
