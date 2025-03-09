@@ -19,7 +19,6 @@ struct EventDetail: View {
     @State private var childrenCount = 0
     
     // Group chat state variables
-    @State private var showingGroupChat = false
     @State private var unreadMessages = 2 // In a real app, this would be fetched from data model
     @State private var showingToast = false
     @State private var toastMessage = ""
@@ -222,24 +221,36 @@ struct EventDetail: View {
                         .cornerRadius(10)
                     }
                     
-                    // Group chat button
-                    Button(action: {
-                        showingGroupChat = true
-                    }) {
-                        HStack {
-                            Image(systemName: "bubble.left.and.bubble.right.fill")
-                            Text("Event Chat")
-                            Spacer()
-                            if unreadMessages > 0 {
-                                Text("\(unreadMessages) new")
-                                    .font(.caption)
+                    // NEW: Chat info message that replaces the chat button
+                    if isAttending {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: "bubble.left.and.bubble.right.fill")
                                     .foregroundColor(Color("AppPrimaryColor"))
+                                
+                                Text("Event Chat Access")
+                                    .font(.headline)
+                                    .foregroundColor(Color("AppPrimaryColor"))
+                                
+                                Spacer()
+                                
+                                if unreadMessages > 0 {
+                                    Text("\(unreadMessages) new")
+                                        .font(.caption)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color("AppPrimaryColor"))
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                }
                             }
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
+                            
+                            Text("You can access this event's group chat in the Messages tab under 'Event Chats'")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                         }
                         .padding()
-                        .background(Color(.systemGray6))
+                        .background(Color("AppPrimaryColor").opacity(0.1))
                         .cornerRadius(10)
                     }
                     
@@ -321,12 +332,6 @@ struct EventDetail: View {
                 EventParticipantView(eventId: event.id)
             }
         }
-        // Sheet for group chat
-        .sheet(isPresented: $showingGroupChat) {
-            NavigationView {
-                GroupChat(eventId: event.id, eventTitle: event.title)
-            }
-        }
     }
     
     private func loadEventDetails() {
@@ -404,13 +409,13 @@ struct EventDetail: View {
         UserDefaults.standard.set(eventChatUnread, forKey: "EventChatUnread")
         
         // Show toast message
-        toastMessage = "Added to event chat"
+        toastMessage = "Added to event chat. Check the Messages tab to participate!"
         withAnimation {
             showingToast = true
         }
         
         // Hide the toast after a delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
             withAnimation {
                 showingToast = false
             }
