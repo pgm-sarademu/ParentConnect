@@ -61,17 +61,6 @@ struct PlaydateCardView: View {
                         .lineLimit(1)
                 }
                 
-                // Age range
-                HStack {
-                    Image(systemName: "person.2.fill")
-                        .font(.system(size: 10))
-                        .foregroundColor(Color("AppPrimaryColor").opacity(0.7))
-                    
-                    Text(playdate.ageRange)
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                }
-                
                 // Host name
                 HStack {
                     Image(systemName: "person.fill")

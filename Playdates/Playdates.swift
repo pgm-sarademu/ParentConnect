@@ -8,7 +8,6 @@ struct PlaydatePreview: Identifiable {
     let title: String
     let date: Date
     let location: String
-    let ageRange: String
     let hostName: String
 }
 
@@ -51,25 +50,6 @@ struct Playdates: View {
             filtered = filtered.filter { $0.date >= today && $0.date <= oneMonthLater }
         default:
             break // All playdates
-        }
-        
-        // Apply age filter
-        if filters.ageFilter != "All Ages" {
-            filtered = filtered.filter { playdate in
-                // Sample implementation - in a real app you'd check actual age ranges
-                switch filters.ageFilter {
-                case "0-2 years":
-                    return playdate.id.hasPrefix("1")
-                case "3-5 years":
-                    return playdate.id.hasPrefix("2")
-                case "6-8 years":
-                    return playdate.id.hasPrefix("3")
-                case "9-12 years":
-                    return playdate.id.hasPrefix("4")
-                default:
-                    return true
-                }
-            }
         }
         
         // Apply distance filter
@@ -179,12 +159,6 @@ struct Playdates: View {
                             if filters.selectedDateRange != .all {
                                 PlaydateFilterTag(text: filters.selectedDateRange.rawValue) {
                                     filters.selectedDateRange = .all
-                                }
-                            }
-                            
-                            if filters.ageFilter != "All Ages" {
-                                PlaydateFilterTag(text: filters.ageFilter) {
-                                    filters.ageFilter = "All Ages"
                                 }
                             }
                             
@@ -324,7 +298,6 @@ struct Playdates: View {
     private func countActiveFilters() -> Int {
         var count = 0
         if filters.selectedDateRange != .all { count += 1 }
-        if filters.ageFilter != "All Ages" { count += 1 }
         if filters.distanceFilter != .any { count += 1 }
         if case .customLocation = filters.customLocation { count += 1 }
         return count
@@ -362,7 +335,6 @@ struct Playdates: View {
                 title: "Playground Meetup",
                 date: calendar.date(byAdding: .day, value: 2, to: currentDate) ?? currentDate,
                 location: "Sunshine Park Playground",
-                ageRange: "3-5 years",
                 hostName: "Sarah Johnson"
             ),
             PlaydatePreview(
@@ -370,7 +342,6 @@ struct Playdates: View {
                 title: "Swimming Pool Fun",
                 date: calendar.date(byAdding: .day, value: 3, to: currentDate) ?? currentDate,
                 location: "Community Pool",
-                ageRange: "4-6 years",
                 hostName: "Michael Brown"
             ),
             PlaydatePreview(
@@ -378,7 +349,6 @@ struct Playdates: View {
                 title: "Library Play Corner",
                 date: calendar.date(byAdding: .day, value: 4, to: currentDate) ?? currentDate,
                 location: "Central Library Kids Area",
-                ageRange: "2-4 years",
                 hostName: "Emma Wilson"
             ),
             PlaydatePreview(
@@ -386,7 +356,6 @@ struct Playdates: View {
                 title: "Nature Walk & Play",
                 date: calendar.date(byAdding: .day, value: 5, to: currentDate) ?? currentDate,
                 location: "Forest Park Trail",
-                ageRange: "6-8 years",
                 hostName: "David Miller"
             ),
             PlaydatePreview(
@@ -394,7 +363,6 @@ struct Playdates: View {
                 title: "Indoor Playground Meetup",
                 date: calendar.date(byAdding: .day, value: 1, to: currentDate) ?? currentDate,
                 location: "Kidz Fun Zone",
-                ageRange: "2-5 years",
                 hostName: "Jennifer Davis"
             ),
             PlaydatePreview(
@@ -402,7 +370,6 @@ struct Playdates: View {
                 title: "Beach Day Sandcastle Building",
                 date: calendar.date(byAdding: .day, value: 6, to: currentDate) ?? currentDate,
                 location: "Sunny Beach",
-                ageRange: "3-7 years",
                 hostName: "Robert Garcia"
             )
         ]
@@ -419,12 +386,8 @@ struct AddPlaydate: View {
     @State private var location = ""
     @State private var description = ""
     @State private var date = Date()
-    @State private var ageRange = "3-5 years"
     @State private var maxChildrenCount = 10
     @State private var hasParticipantLimit = false
-    
-    // Age range options
-    let ageRanges = ["0-2 years", "3-5 years", "6-8 years", "9-12 years", "Teenagers"]
     
     // Error handling
     @State private var showingAlert = false
@@ -437,12 +400,6 @@ struct AddPlaydate: View {
                     TextField("Playdate Title (e.g., Park Meetup)", text: $title)
                     TextField("Location (e.g., Central Park Playground)", text: $location)
                     DatePicker("Date & Time", selection: $date)
-                    
-                    Picker("Age Range", selection: $ageRange) {
-                        ForEach(ageRanges, id: \.self) { range in
-                            Text(range).tag(range)
-                        }
-                    }
                 }
                 
                 Section(header: Text("Description")) {

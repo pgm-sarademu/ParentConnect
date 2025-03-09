@@ -54,14 +54,6 @@ struct PlaydateDetail: View {
                         }
                         
                         HStack {
-                            Image(systemName: "person.2")
-                                .foregroundColor(Color("AppPrimaryColor"))
-                            
-                            Text("Age range: \(playdate.ageRange)")
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        HStack {
                             Image(systemName: "person.fill")
                                 .foregroundColor(Color("AppPrimaryColor"))
                             

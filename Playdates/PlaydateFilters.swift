@@ -6,7 +6,6 @@ import CoreLocation
 
 struct PlaydateFilters {
     var selectedDateRange: DateRangeFilter = .all
-    var ageFilter: String = "All Ages"
     var distanceFilter: DistanceFilter = .any
     var customLocation: LocationOption = .currentLocation
     
@@ -270,8 +269,6 @@ struct PlaydateFiltersView: View {
     @State private var searchResults: [PlaydateLocationSearchResult] = []
     @EnvironmentObject var locationManager: LocationManager
     
-    let ageRanges = ["All Ages", "0-2 years", "3-5 years", "6-8 years", "9-12 years", "Teenagers"]
-    
     init(filters: Binding<PlaydateFilters>, isPresented: Binding<Bool>) {
         self._filters = filters
         self._isPresented = isPresented
@@ -281,33 +278,6 @@ struct PlaydateFiltersView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // Age range filter section
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Age Range")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal)
-                    
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 10) {
-                            ForEach(ageRanges, id: \.self) { range in
-                                PlaydateFilterChip(
-                                    title: range,
-                                    isSelected: tempFilters.ageFilter == range,
-                                    action: {
-                                        tempFilters.ageFilter = range
-                                    }
-                                )
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                }
-                .padding(.vertical)
-                .background(Color(.systemBackground))
-                
-                Divider()
-                
                 // Date filter section
                 VStack(alignment: .leading, spacing: 10) {
                     Text("When")
@@ -470,7 +440,6 @@ struct PlaydateFiltersView: View {
     private func countActiveFilters() -> Int {
         var count = 0
         if tempFilters.selectedDateRange != .all { count += 1 }
-        if tempFilters.ageFilter != "All Ages" { count += 1 }
         if tempFilters.distanceFilter != .any { count += 1 }
         if case .customLocation = tempFilters.customLocation { count += 1 }
         return count

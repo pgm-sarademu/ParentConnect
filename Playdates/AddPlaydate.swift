@@ -10,7 +10,6 @@ struct AddPlaydateView: View {
     @State private var location = ""
     @State private var description = ""
     @State private var date = Date()
-    @State private var ageRangeSelection = 1  // Index in ageRanges array
     @State private var privacyOption = 0 // 0=Public, 1=Friends, 2=Private
     
     // Participant limits
@@ -23,9 +22,6 @@ struct AddPlaydateView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     
-    // Available age ranges
-    let ageRanges = ["0-2 years", "3-5 years", "6-8 years", "9-12 years", "Teenagers"]
-    
     var body: some View {
         NavigationView {
             Form {
@@ -33,12 +29,6 @@ struct AddPlaydateView: View {
                     TextField("Playdate Title", text: $title)
                     TextField("Location", text: $location)
                     DatePicker("Date & Time", selection: $date)
-                    
-                    Picker("Age Range", selection: $ageRangeSelection) {
-                        ForEach(0..<ageRanges.count, id: \.self) { index in
-                            Text(ageRanges[index]).tag(index)
-                        }
-                    }
                 }
                 
                 Section(header: Text("Description")) {
