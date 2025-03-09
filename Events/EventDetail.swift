@@ -21,6 +21,8 @@ struct EventDetail: View {
     // Group chat state variables
     @State private var showingGroupChat = false
     @State private var unreadMessages = 2 // In a real app, this would be fetched from data model
+    @State private var showingToast = false
+    @State private var toastMessage = ""
     
     var body: some View {
         ScrollView {
@@ -156,7 +158,16 @@ struct EventDetail: View {
                                 return
                             }
                             
+                            // Toggle attendance
                             isAttending.toggle()
+                            
+                            // If the user is now attending, add them to the event chat
+                            if isAttending {
+                                addUserToEventChat()
+                            } else {
+                                // If the user is no longer attending, we might want to give an option to leave the chat
+                                // or we could keep them in the chat - that's a product decision
+                            }
                         }) {
                             HStack {
                                 Image(systemName: isAttending ? "checkmark.circle.fill" : "circle")
@@ -278,6 +289,29 @@ struct EventDetail: View {
                 }
                 .padding()
             }
+            
+            // Toast message overlay
+            if showingToast {
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.white)
+                        
+                        Text(toastMessage)
+                            .foregroundColor(.white)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                    .background(Color("AppPrimaryColor").opacity(0.9))
+                    .cornerRadius(8)
+                    .padding(.bottom, 50)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
         }
         .edgesIgnoringSafeArea(.top)
         .navigationBarTitleDisplayMode(.inline)
@@ -298,6 +332,10 @@ struct EventDetail: View {
     private func loadEventDetails() {
         // In a real app, fetch the event details from Core Data or your API
         // For this example, we'll use mock data based on the privacy settings in UserDefaults
+        
+        // Check if user is already attending this event
+        let attendingEvents = UserDefaults.standard.dictionary(forKey: "UserAttendingEvents") as? [String: Bool] ?? [:]
+        isAttending = attendingEvents[event.id] == true
         
         // Get privacy level from UserDefaults
         let privacySettings = UserDefaults.standard.dictionary(forKey: "EventPrivacySettings") as? [String: Int] ?? [:]
@@ -345,7 +383,38 @@ struct EventDetail: View {
         
         // Load unread message count for group chat
         // In a real app, this would be fetched from your data store
-        unreadMessages = Int.random(in: 0...5)
+        let eventChatUnread = UserDefaults.standard.dictionary(forKey: "EventChatUnread") as? [String: Int] ?? [:]
+        unreadMessages = eventChatUnread[event.id] ?? Int.random(in: 0...5)
+    }
+    
+    private func addUserToEventChat() {
+        // Update attendance status
+        var attendingEvents = UserDefaults.standard.dictionary(forKey: "UserAttendingEvents") as? [String: Bool] ?? [:]
+        attendingEvents[event.id] = true
+        UserDefaults.standard.set(attendingEvents, forKey: "UserAttendingEvents")
+        
+        // Create an entry in UserDefaults to track event chats
+        var eventChats = UserDefaults.standard.dictionary(forKey: "UserEventChats") as? [String: Bool] ?? [:]
+        eventChats[event.id] = true
+        UserDefaults.standard.set(eventChats, forKey: "UserEventChats")
+        
+        // Update unread count to 0 since the user just joined
+        var eventChatUnread = UserDefaults.standard.dictionary(forKey: "EventChatUnread") as? [String: Int] ?? [:]
+        eventChatUnread[event.id] = 0
+        UserDefaults.standard.set(eventChatUnread, forKey: "EventChatUnread")
+        
+        // Show toast message
+        toastMessage = "Added to event chat"
+        withAnimation {
+            showingToast = true
+        }
+        
+        // Hide the toast after a delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            withAnimation {
+                showingToast = false
+            }
+        }
     }
     
     private func formatFullDate(_ date: Date) -> String {

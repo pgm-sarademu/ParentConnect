@@ -1,11 +1,5 @@
 import SwiftUI
 
-struct EventChatStatus {
-    let isActive: Bool
-    let participantCount: Int
-    let unreadMessageCount: Int
-}
-
 struct GroupMessage: Identifiable {
     let id: String
     let senderName: String
@@ -121,11 +115,12 @@ struct GroupChat: View {
             .background(Color(.systemBackground))
             .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: -5)
         }
-        .navigationTitle("Event Chat")
+        .navigationTitle("\(eventTitle) Chat")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             loadMockMessages()
             loadMockParticipants()
+            markChatAsRead()
         }
         .sheet(isPresented: $isShowingParticipants) {
             ParticipantList(participants: participants, eventTitle: eventTitle)
@@ -133,48 +128,70 @@ struct GroupChat: View {
     }
     
     private func loadMockMessages() {
-        messages = [
-            GroupMessage(
-                id: "1",
-                senderName: "Sarah Johnson",
-                senderAvatar: "👩‍👧",
-                text: "Hi everyone! Is anyone planning to bring snacks to the event?",
-                timestamp: Date().addingTimeInterval(-3600*3),
-                isFromCurrentUser: false
-            ),
-            GroupMessage(
-                id: "2",
-                senderName: "Mike Thompson",
-                senderAvatar: "👨‍👦",
-                text: "I can bring some fruit and juice boxes for the kids.",
-                timestamp: Date().addingTimeInterval(-3600*2),
-                isFromCurrentUser: false
-            ),
-            GroupMessage(
-                id: "3",
-                senderName: "Emma Roberts",
-                senderAvatar: "👩‍👧‍👦",
-                text: "Great! I'll bring some veggie sticks and dip.",
-                timestamp: Date().addingTimeInterval(-3600),
-                isFromCurrentUser: false
-            ),
-            GroupMessage(
-                id: "4",
-                senderName: "You",
-                senderAvatar: "👩‍👦",
-                text: "Sounds good! I'll bring some cookies then.",
-                timestamp: Date().addingTimeInterval(-1800),
-                isFromCurrentUser: true
-            ),
-            GroupMessage(
-                id: "5",
-                senderName: "David Wilson",
-                senderAvatar: "👨‍👧",
-                text: "Looking forward to meeting everyone's kids!",
-                timestamp: Date(),
-                isFromCurrentUser: false
-            )
-        ]
+        // Check if there are existing messages in UserDefaults
+        let eventMessagesKey = "EventMessages_\(eventId)"
+        if let savedData = UserDefaults.standard.data(forKey: eventMessagesKey),
+           let savedMessages = try? JSONDecoder().decode([GroupMessageDTO].self, from: savedData) {
+            
+            // Convert saved DTO objects to GroupMessage objects
+            messages = savedMessages.map { dto in
+                GroupMessage(
+                    id: dto.id,
+                    senderName: dto.senderName,
+                    senderAvatar: dto.senderAvatar,
+                    text: dto.text,
+                    timestamp: Date(timeIntervalSince1970: dto.timestamp),
+                    isFromCurrentUser: dto.isFromCurrentUser
+                )
+            }
+        } else {
+            // Create default mock messages if none exist
+            messages = [
+                GroupMessage(
+                    id: "1",
+                    senderName: "Sarah Johnson",
+                    senderAvatar: "👩‍👧",
+                    text: "Hi everyone! Is anyone planning to bring snacks to the event?",
+                    timestamp: Date().addingTimeInterval(-3600*3),
+                    isFromCurrentUser: false
+                ),
+                GroupMessage(
+                    id: "2",
+                    senderName: "Mike Thompson",
+                    senderAvatar: "👨‍👦",
+                    text: "I can bring some fruit and juice boxes for the kids.",
+                    timestamp: Date().addingTimeInterval(-3600*2),
+                    isFromCurrentUser: false
+                ),
+                GroupMessage(
+                    id: "3",
+                    senderName: "Emma Roberts",
+                    senderAvatar: "👩‍👧‍👦",
+                    text: "Great! I'll bring some veggie sticks and dip.",
+                    timestamp: Date().addingTimeInterval(-3600),
+                    isFromCurrentUser: false
+                ),
+                GroupMessage(
+                    id: "4",
+                    senderName: "You",
+                    senderAvatar: "👩‍👦",
+                    text: "Sounds good! I'll bring some cookies then.",
+                    timestamp: Date().addingTimeInterval(-1800),
+                    isFromCurrentUser: true
+                ),
+                GroupMessage(
+                    id: "5",
+                    senderName: "David Wilson",
+                    senderAvatar: "👨‍👧",
+                    text: "Looking forward to meeting everyone's kids!",
+                    timestamp: Date(),
+                    isFromCurrentUser: false
+                )
+            ]
+            
+            // Save these messages to UserDefaults
+            saveMessagesToUserDefaults()
+        }
     }
     
     private func loadMockParticipants() {
@@ -190,8 +207,13 @@ struct GroupChat: View {
     }
     
     private func sendMessage() {
+        sendMessageAndUpdateList()
+    }
+    
+    private func sendMessageAndUpdateList() {
         guard !newMessageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         
+        // Create the new message
         let newMessage = GroupMessage(
             id: UUID().uuidString,
             senderName: "You",
@@ -201,8 +223,69 @@ struct GroupChat: View {
             isFromCurrentUser: true
         )
         
+        // Add to local messages array
         messages.append(newMessage)
+        
+        // Save messages to UserDefaults
+        saveMessagesToUserDefaults()
+        
+        // Update the event chat's last message in UserDefaults
+        // This is to simulate the backend updating the chat for all users
+        var eventChatsLastMessage = UserDefaults.standard.dictionary(forKey: "EventChatsLastMessage") as? [String: String] ?? [:]
+        eventChatsLastMessage[eventId] = newMessageText
+        UserDefaults.standard.set(eventChatsLastMessage, forKey: "EventChatsLastMessage")
+        
+        // Update unread count for other users
+        // In a real app, this would be handled by the backend
+        var eventChatUnread = UserDefaults.standard.dictionary(forKey: "EventChatUnread") as? [String: Int] ?? [:]
+        let currentUnread = eventChatUnread[eventId] ?? 0
+        eventChatUnread[eventId] = currentUnread + 1
+        UserDefaults.standard.set(eventChatUnread, forKey: "EventChatUnread")
+        
+        // Reset the text field
         newMessageText = ""
+        
+        // Update timestamp for sorting in the messages list
+        var eventChatsTimestamp = UserDefaults.standard.dictionary(forKey: "EventChatsTimestamp") as? [String: Double] ?? [:]
+        eventChatsTimestamp[eventId] = Date().timeIntervalSince1970
+        UserDefaults.standard.set(eventChatsTimestamp, forKey: "EventChatsTimestamp")
+    }
+    
+    // Data Transfer Object for storing messages in UserDefaults
+    private struct GroupMessageDTO: Codable {
+        let id: String
+        let senderName: String
+        let senderAvatar: String
+        let text: String
+        let timestamp: TimeInterval
+        let isFromCurrentUser: Bool
+    }
+    
+    private func saveMessagesToUserDefaults() {
+        // Convert messages to DTOs for storage
+        let dtos = messages.map { message in
+            GroupMessageDTO(
+                id: message.id,
+                senderName: message.senderName,
+                senderAvatar: message.senderAvatar,
+                text: message.text,
+                timestamp: message.timestamp.timeIntervalSince1970,
+                isFromCurrentUser: message.isFromCurrentUser
+            )
+        }
+        
+        // Save to UserDefaults
+        if let encoded = try? JSONEncoder().encode(dtos) {
+            let eventMessagesKey = "EventMessages_\(eventId)"
+            UserDefaults.standard.set(encoded, forKey: eventMessagesKey)
+        }
+    }
+    
+    func markChatAsRead() {
+        // Reset unread count for this event (for the current user only)
+        var eventChatUnread = UserDefaults.standard.dictionary(forKey: "EventChatUnread") as? [String: Int] ?? [:]
+        eventChatUnread[eventId] = 0
+        UserDefaults.standard.set(eventChatUnread, forKey: "EventChatUnread")
     }
 }
 
