@@ -52,15 +52,7 @@ struct HomeView: View {
                         // Fixed Map implementation
                         if #available(iOS 17.0, *) {
                             Map(initialPosition: MapCameraPosition.region(region)) {
-                                // Parent markers
-                                ForEach(nearbyParents) { parent in
-                                    if let coord = getParentCoordinates(parent) {
-                                        Marker(parent.name, coordinate: coord)
-                                            .tint(.blue)
-                                    }
-                                }
-                                
-                                // Event markers
+                                // Event markers only
                                 ForEach(upcomingEvents) { event in
                                     if let coord = getEventCoordinates(event) {
                                         Marker(event.title, coordinate: coord)
@@ -76,23 +68,14 @@ struct HomeView: View {
                             // Create annotated items first
                             let annotatedItems = createAnnotatedItems()
                             Map(coordinateRegion: $region, annotationItems: annotatedItems) { item in
-                                MapMarker(coordinate: item.coordinate, tint: item.isParent ? .blue : Color("AppPrimaryColor"))
+                                MapMarker(coordinate: item.coordinate, tint: Color("AppPrimaryColor"))
                             }
                             .frame(height: 200)
                             .cornerRadius(12)
                         }
                         
-                        // Map legend
+                        // Map legend - removed parent indicator
                         HStack(spacing: 16) {
-                            HStack(spacing: 4) {
-                                Circle()
-                                    .fill(.blue)
-                                    .frame(width: 8, height: 8)
-                                Text("Parents")
-                                    .font(.caption2)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.white)
-                            }
                             HStack(spacing: 4) {
                                 Circle()
                                     .fill(Color("AppPrimaryColor"))
@@ -223,18 +206,11 @@ struct HomeView: View {
         let isParent: Bool
     }
     
-    // Helper function to create combined annotated items
+    // Helper function to create annotated items - now only includes events
     private func createAnnotatedItems() -> [AnnotatedItem] {
         var items = [AnnotatedItem]()
         
-        // Add parent annotations
-        for parent in nearbyParents {
-            if let coord = getParentCoordinates(parent) {
-                items.append(AnnotatedItem(id: parent.id, coordinate: coord, isParent: true))
-            }
-        }
-        
-        // Add event annotations
+        // Only add event annotations
         for event in upcomingEvents {
             if let coord = getEventCoordinates(event) {
                 items.append(AnnotatedItem(id: "event_\(event.id)", coordinate: coord, isParent: false))
@@ -244,7 +220,7 @@ struct HomeView: View {
         return items
     }
     
-    // Helper function to get coordinates from a ParentPreview
+    // Helper function to get coordinates from a ParentPreview - kept for reference
     private func getParentCoordinates(_ parent: ParentPreview) -> CLLocationCoordinate2D? {
         // Mock implementation - in a real app, this would use actual stored coordinates
         let baseLocation = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
@@ -262,7 +238,7 @@ struct HomeView: View {
         return baseLocation
     }
     
-    // New helper function to get coordinates for events
+    // Helper function to get coordinates for events
     private func getEventCoordinates(_ event: EventPreview) -> CLLocationCoordinate2D? {
         // Mock implementation - in a real app, this would use actual stored coordinates
         let baseLocation = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
@@ -421,18 +397,18 @@ struct HomeEventCard: View {
     private func formatDay(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE"
-        return formatter.string(from: date)
-    }
-    
-    private func formatDayNumber(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "d"
-        return formatter.string(from: date)
-    }
-    
-    private func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
-    }
-}
+                return formatter.string(from: date)
+            }
+            
+            private func formatDayNumber(_ date: Date) -> String {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "d"
+                return formatter.string(from: date)
+            }
+            
+            private func formatTime(_ date: Date) -> String {
+                let formatter = DateFormatter()
+                formatter.timeStyle = .short
+                return formatter.string(from: date)
+            }
+        }
