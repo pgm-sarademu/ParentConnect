@@ -25,6 +25,23 @@ struct AddPlaydateView: View {
     var body: some View {
         NavigationView {
             Form {
+                Section {
+                    // Safety Warning Alert
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                            Text("Safety Warning")
+                                .font(.headline)
+                                .foregroundColor(.orange)
+                        }
+                        
+                        Text("For safety, we recommend meeting in public spaces and supervising children during playdates.")
+                            .font(.subheadline)
+                    }
+                    .padding(.vertical, 8)
+                }
+                
                 Section(header: Text("Playdate Details")) {
                     TextField("Playdate Title", text: $title)
                     TextField("Location", text: $location)
