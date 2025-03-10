@@ -230,9 +230,7 @@ struct Playdates: View {
                         }
                         .padding(.top, 10)
                         
-                        Button(action: {
-                            showingAddPlaydateSheet = true
-                        }) {
+                        NavigationLink(destination: AddPlaydateView()) {
                             HStack {
                                 Image(systemName: "plus.circle.fill")
                                 Text("Create a Playdate")
@@ -283,7 +281,7 @@ struct Playdates: View {
                 loadMockPlaydates()
             }
             .sheet(isPresented: $showingAddPlaydateSheet) {
-                AddPlaydate()
+                AddPlaydateView()
             }
             .sheet(isPresented: $showingFilters) {
                 PlaydateFiltersView(filters: $filters, isPresented: $showingFilters)
@@ -373,124 +371,5 @@ struct Playdates: View {
                 hostName: "Robert Garcia"
             )
         ]
-    }
-}
-
-// MARK: - Add Playdate View
-
-struct AddPlaydate: View {
-    @Environment(\.presentationMode) var presentationMode
-    
-    // Form fields
-    @State private var title = ""
-    @State private var location = ""
-    @State private var description = ""
-    @State private var date = Date()
-    @State private var maxChildrenCount = 10
-    @State private var hasParticipantLimit = false
-    
-    // Error handling
-    @State private var showingAlert = false
-    @State private var alertMessage = ""
-    
-    var body: some View {
-        NavigationView {
-            Form {
-                Section {
-                    // Safety Warning
-                    HStack(alignment: .top, spacing: 12) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.orange)
-                            .font(.title2)
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Safety Warning")
-                                .font(.headline)
-                                .foregroundColor(.orange)
-                            
-                            Text("For safety, we recommend meeting in public spaces and supervising children during playdates.")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .padding(.vertical, 8)
-                }
-                
-                Section(header: Text("Playdate Details")) {
-                    TextField("Playdate Title (e.g., Park Meetup)", text: $title)
-                    TextField("Location (e.g., Central Park Playground)", text: $location)
-                    DatePicker("Date & Time", selection: $date)
-                }
-                
-                Section(header: Text("Description")) {
-                    TextEditor(text: $description)
-                        .frame(minHeight: 100)
-                        .overlay(
-                            Group {
-                                if description.isEmpty {
-                                    Text("Describe your playdate... (e.g., Let's meet at the playground for some fun! Bring snacks if you'd like. All parents should stay with their children.)")
-                                        .foregroundColor(.gray)
-                                        .padding(.horizontal, 4)
-                                        .padding(.vertical, 8)
-                                        .allowsHitTesting(false)
-                                }
-                            }
-                        )
-                }
-                
-                Section(header: Text("Participant Limits")) {
-                    Toggle("Limit number of participants", isOn: $hasParticipantLimit)
-                    
-                    if hasParticipantLimit {
-                        Stepper("Maximum number of children: \(maxChildrenCount)", value: $maxChildrenCount, in: 1...100)
-                        
-                        Text("This will limit the playdate to a maximum of \(maxChildrenCount) children total.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                Button(action: savePlaydate) {
-                    Text("Create Playdate")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color("AppPrimaryColor"))
-                        .cornerRadius(10)
-                }
-            }
-            .navigationTitle("Create Playdate")
-            .navigationBarItems(leading: Button("Cancel") {
-                presentationMode.wrappedValue.dismiss()
-            })
-            .alert(isPresented: $showingAlert) {
-                Alert(
-                    title: Text("Error"),
-                    message: Text(alertMessage),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
-        }
-    }
-    
-    private func savePlaydate() {
-        // Basic validation
-        guard !title.isEmpty else {
-            alertMessage = "Please enter a title"
-            showingAlert = true
-            return
-        }
-        
-        guard !location.isEmpty else {
-            alertMessage = "Please enter a location"
-            showingAlert = true
-            return
-        }
-        
-        // Create the playdate
-        // In a real app, this would save to Core Data or similar
-        
-        // Close the form
-        presentationMode.wrappedValue.dismiss()
     }
 }
