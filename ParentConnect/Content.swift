@@ -18,10 +18,10 @@ struct ContentView: View {
                     }
                     .tag(0)
                 
-                // Messages tab
-                MessagesView()
+                // Playdates tab
+                Playdates()
                     .tabItem {
-                        Label("Messages", systemImage: "message.fill")
+                        Label("Playdates", systemImage: "figure.2.and.child.holdinghands")
                     }
                     .tag(1)
                 
@@ -32,10 +32,10 @@ struct ContentView: View {
                     }
                     .tag(2)
                 
-                // Playdates tab (new)
-                Playdates()
+                // Messages tab
+                MessagesView()
                     .tabItem {
-                        Label("Playdates", systemImage: "figure.2.and.child.holdinghands")
+                        Label("Messages", systemImage: "message.fill")
                     }
                     .tag(3)
                 
