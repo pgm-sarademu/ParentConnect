@@ -42,7 +42,7 @@ struct ContentView: View {
                 // Activities tab
                 Activities()
                     .tabItem {
-                        Label("Activities", systemImage: "doc.fill")
+                        Label("Activities", systemImage: "paintbrush")
                     }
                     .tag(4)
             }
