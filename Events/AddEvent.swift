@@ -229,7 +229,7 @@ struct AddEventView: View {
         }
         
         // Calculate next occurrence
-        var currentDate = date.addingTimeInterval(intervalInSeconds)
+        let currentDate = date.addingTimeInterval(intervalInSeconds)
         if currentDate <= recurrenceEndDate {
             occurrences.append(currentDate)
         }
