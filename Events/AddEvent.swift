@@ -34,147 +34,156 @@ struct AddEventView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Event Details")) {
-                    TextField("Event Title (e.g., Kids Yoga Class)", text: $title)
-                    TextField("Location (e.g., Community Center)", text: $location)
+                // MARK: - Event Details
+                Section {
+                    TextField("Event Title", text: $title)
+                        .font(.body)
+                    
+                    TextField("Location", text: $location)
+                        .font(.body)
+                    
                     DatePicker("Date & Time", selection: $date)
+                        .font(.body)
+                    
                     TextField("Age Range (e.g., 3-5 years)", text: $ageRange)
+                        .font(.body)
                         .keyboardType(.default)
-                    TextField("Organizer/Host Name", text: $organizerName)
+                    
+                    TextField("Organizer/Host", text: $organizerName)
+                        .font(.body)
+                } header: {
+                    Text("Event Details")
                 }
                 
-                Section(header: Text("Description")) {
+                // MARK: - Description
+                Section {
                     TextEditor(text: $description)
                         .frame(minHeight: 100)
+                        .font(.body)
                         .overlay(
                             Group {
                                 if description.isEmpty {
-                                    Text("Describe your event... (e.g., A structured yoga class designed for children to improve flexibility and focus. Mats will be provided. Each session is 45 minutes long.)")
+                                    Text("Describe your event...")
                                         .foregroundColor(.gray)
+                                        .font(.body)
                                         .padding(.horizontal, 4)
                                         .padding(.vertical, 8)
                                         .allowsHitTesting(false)
                                 }
                             }
                         )
+                } header: {
+                    Text("Description")
                 }
                 
-                Section(header: Text("Recurring Event")) {
+                // MARK: - Recurring Event Options
+                Section {
                     Toggle("This is a recurring event", isOn: $isRecurring.animation())
                     
                     if isRecurring {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Repeat frequency")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .padding(.top, 4)
-                        
-                            Picker("Repeats", selection: $recurrenceType) {
-                                Text("Daily").tag(0)
-                                Text("Weekly").tag(1)
-                                Text("Monthly").tag(2)
-                            }
-                            .pickerStyle(SegmentedPickerStyle())
+                        // Repeat frequency
+                        Picker("Repeats", selection: $recurrenceType) {
+                            Text("Daily").tag(0)
+                            Text("Weekly").tag(1)
+                            Text("Monthly").tag(2)
                         }
+                        .pickerStyle(SegmentedPickerStyle())
                         
+                        // Repeat every X days/weeks/months
                         HStack {
                             Text("Repeat every")
                             Spacer()
                             
-                            HStack(spacing: 4) {
-                                Picker("", selection: $recurrenceFrequency) {
-                                    ForEach(1...30, id: \.self) { number in
-                                        Text("\(number)").tag(number)
-                                    }
+                            Picker("", selection: $recurrenceFrequency) {
+                                ForEach(1...30, id: \.self) { number in
+                                    Text("\(number)").tag(number)
                                 }
-                                .pickerStyle(MenuPickerStyle())
-                                .frame(width: 70)
-                                
-                                Text(recurrenceTypeName(type: recurrenceType, frequency: recurrenceFrequency))
-                                    .foregroundColor(.secondary)
                             }
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-                        }
+                            .pickerStyle(MenuPickerStyle())
+                            .frame(width: 60)
                             
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Series end date")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        
-                            DatePicker("", selection: $recurrenceEndDate, in: date...)
-                                .datePickerStyle(CompactDatePickerStyle())
-                                .labelsHidden()
+                            Text(recurrenceTypeName(type: recurrenceType, frequency: recurrenceFrequency))
+                                .foregroundColor(.gray)
                         }
                         
-                        // Preview of recurrence pattern
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("First 3 occurrences:")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .padding(.top, 8)
-                                
-                            ForEach(0..<min(3, calculateOccurrences().count), id: \.self) { index in
-                                Text(formatDate(calculateOccurrences()[index]))
-                                    .font(.caption)
-                                    .padding(.vertical, 4)
-                                    .padding(.horizontal, 10)
-                                    .background(Color("AppPrimaryColor").opacity(0.1))
-                                    .foregroundColor(Color("AppPrimaryColor"))
-                                    .cornerRadius(6)
+                        // End date
+                        DatePicker("Ends on", selection: $recurrenceEndDate, in: date...)
+                            .datePickerStyle(DefaultDatePickerStyle())
+                        
+                        // Preview of occurrences
+                        if !calculateOccurrences().isEmpty {
+                            HStack {
+                                Text("Next occurrence:")
+                                    .font(.footnote)
+                                Spacer()
+                                Text(formatDate(calculateOccurrences()[0]))
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
                             }
                         }
                     }
+                } header: {
+                    Text("Recurring Event")
                 }
                 
-                Section(header: Text("Privacy")) {
-                    Picker("Who can see this event?", selection: $privacyOption) {
+                // MARK: - Privacy
+                Section {
+                    Picker("Privacy", selection: $privacyOption) {
                         Text("Public").tag(0)
                         Text("Friends Only").tag(1)
                         Text("Private (Invite Only)").tag(2)
                     }
                     .pickerStyle(SegmentedPickerStyle())
+                } header: {
+                    Text("Privacy")
                 }
                 
-                Section(header: Text("Participant Limits")) {
-                    Toggle("Limit number of participants", isOn: $hasParticipantLimit)
+                // MARK: - Participant Limits
+                Section {
+                    Toggle("Limit number of participants", isOn: $hasParticipantLimit.animation())
                     
                     if hasParticipantLimit {
-                        Stepper("Maximum number of children: \(maxChildrenCount)", value: $maxChildrenCount, in: 1...100)
+                        Stepper("\(maxChildrenCount) children maximum", value: $maxChildrenCount, in: 1...100)
                         
-                        Text("This will limit the event to a maximum of \(maxChildrenCount) children total, regardless of how many parents attend.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        TextField("Additional limit notes (optional)", text: $limitDescription)
-                            .font(.subheadline)
+                        TextField("Additional limit notes", text: $limitDescription)
+                            .font(.body)
                     }
+                } header: {
+                    Text("Participant Limits")
                 }
                 
-                Section(header: Text("Pricing")) {
-                    Toggle("This is a paid event", isOn: $isPaid)
+                // MARK: - Pricing
+                Section {
+                    Toggle("This is a paid event", isOn: $isPaid.animation())
                     
                     if isPaid {
-                        TextField("Price", text: $price)
-                            .keyboardType(.decimalPad)
+                        HStack {
+                            Text("$")
+                            TextField("Price", text: $price)
+                                .keyboardType(.decimalPad)
+                        }
                     }
+                } header: {
+                    Text("Pricing")
                 }
                 
-                Button(action: saveEvent) {
-                    Text("Create Event")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color("AppPrimaryColor"))
-                        .cornerRadius(10)
+                // MARK: - Create Button
+                Section {
+                    Button(action: saveEvent) {
+                        Text("Create Event")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                    .listRowBackground(Color("AppPrimaryColor"))
+                    .foregroundColor(.white)
                 }
             }
-            .navigationTitle("Create Structured Event")
-            .navigationBarItems(leading: Button("Cancel") {
-                presentationMode.wrappedValue.dismiss()
-            })
+            .navigationTitle("Create Event")
+            .navigationBarItems(
+                leading: Button("Cancel") {
+                    presentationMode.wrappedValue.dismiss()
+                }
+            )
             .alert(isPresented: $showingAlert) {
                 Alert(
                     title: Text("Error"),
@@ -185,6 +194,7 @@ struct AddEventView: View {
         }
     }
     
+    // MARK: - Helper Functions
     private func recurrenceTypeName(type: Int, frequency: Int) -> String {
         let plural = frequency > 1
         
@@ -200,6 +210,41 @@ struct AddEventView: View {
         }
     }
     
+    private func calculateOccurrences() -> [Date] {
+        var occurrences: [Date] = []
+        
+        // First occurrence is the original date
+        occurrences.append(date)
+        
+        var intervalInSeconds: TimeInterval = 0
+        switch recurrenceType {
+        case 0: // Daily
+            intervalInSeconds = Double(recurrenceFrequency) * 24 * 3600
+        case 1: // Weekly
+            intervalInSeconds = Double(recurrenceFrequency) * 7 * 24 * 3600
+        case 2: // Monthly
+            intervalInSeconds = Double(recurrenceFrequency) * 30 * 24 * 3600
+        default:
+            break
+        }
+        
+        // Calculate next occurrence
+        var currentDate = date.addingTimeInterval(intervalInSeconds)
+        if currentDate <= recurrenceEndDate {
+            occurrences.append(currentDate)
+        }
+        
+        return occurrences
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+    
+    // MARK: - Save Event Function
     private func saveEvent() {
         // Basic validation
         guard !title.isEmpty else {
@@ -247,7 +292,7 @@ struct AddEventView: View {
             }
         }
         
-        // Store the privacy option in UserDefaults
+        // Store the privacy option in UserDefaults since we don't have a field for it
         let privacySettings = UserDefaults.standard.dictionary(forKey: "EventPrivacySettings") as? [String: Int] ?? [:]
         var updatedSettings = privacySettings
         updatedSettings[newEvent.id!] = privacyOption
@@ -287,38 +332,6 @@ struct AddEventView: View {
             alertMessage = "Could not save event: \(error.localizedDescription)"
             showingAlert = true
         }
-    }
-    
-    private func calculateOccurrences() -> [Date] {
-        var occurrences: [Date] = [date] // First occurrence is the original date
-        
-        var intervalInSeconds: TimeInterval = 0
-        switch recurrenceType {
-        case 0: // Daily
-            intervalInSeconds = Double(recurrenceFrequency) * 24 * 3600
-        case 1: // Weekly
-            intervalInSeconds = Double(recurrenceFrequency) * 7 * 24 * 3600
-        case 2: // Monthly
-            // Approximate a month as 30 days
-            intervalInSeconds = Double(recurrenceFrequency) * 30 * 24 * 3600
-        default:
-            break
-        }
-        
-        var currentDate = date.addingTimeInterval(intervalInSeconds)
-        while currentDate <= recurrenceEndDate && occurrences.count < 10 {
-            occurrences.append(currentDate)
-            currentDate = currentDate.addingTimeInterval(intervalInSeconds)
-        }
-        
-        return occurrences
-    }
-    
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
     }
     
     private func createRecurringEvents(baseEvent: Event) {
