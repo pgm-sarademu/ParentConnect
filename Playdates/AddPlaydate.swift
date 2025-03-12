@@ -25,13 +25,14 @@ struct AddPlaydateView: View {
     var body: some View {
         NavigationView {
             Form {
+                // MARK: - Safety Reminder
                 Section {
-                    // Safety Warning Alert
+                    // Safety Reminder Alert
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundColor(.orange)
-                            Text("Safety Warning")
+                            Text("Safety Reminder")
                                 .font(.headline)
                                 .foregroundColor(.orange)
                         }
@@ -42,87 +43,89 @@ struct AddPlaydateView: View {
                     .padding(.vertical, 8)
                 }
                 
-                Section(header: Text("Playdate Details")) {
+                // MARK: - Playdate Details
+                Section {
                     TextField("Playdate Title", text: $title)
+                        .font(.body)
+                    
                     TextField("Location", text: $location)
+                        .font(.body)
+                    
                     DatePicker("Date & Time", selection: $date)
+                        .font(.body)
+                } header: {
+                    Text("Playdate Details")
                 }
                 
-                Section(header: Text("Description")) {
+                // MARK: - Description
+                Section {
                     TextEditor(text: $description)
                         .frame(minHeight: 100)
+                        .font(.body)
                         .overlay(
                             Group {
                                 if description.isEmpty {
                                     Text("Describe the playdate, what activities are planned, what to bring, etc.")
                                         .foregroundColor(.gray)
-                                        .padding(8)
+                                        .font(.body)
+                                        .padding(.horizontal, 4)
+                                        .padding(.vertical, 8)
                                         .allowsHitTesting(false)
                                 }
                             }
                         )
+                } header: {
+                    Text("Description")
                 }
                 
-                Section(header: Text("Privacy")) {
+                // MARK: - Privacy
+                Section {
                     Picker("Who can see this playdate?", selection: $privacyOption) {
                         Text("Public").tag(0)
                         Text("Friends Only").tag(1)
                         Text("Private (Invite Only)").tag(2)
                     }
                     .pickerStyle(SegmentedPickerStyle())
+                } header: {
+                    Text("Privacy")
                 }
                 
-                Section(header: Text("Participant Limits")) {
+                // MARK: - Participant Numbers
+                Section {
                     HStack {
-                        Text("Maximum number of children:")
-                            .font(.subheadline)
-                        
+                        Text("Maximum children")
                         Spacer()
-                        
-                        Text("\(maxChildrenCount)")
-                            .font(.headline)
-                            .foregroundColor(Color("AppPrimaryColor"))
+                        Stepper("\(maxChildrenCount)", value: $maxChildrenCount, in: 1...20)
+                            .fixedSize()
                     }
                     
-                    Stepper("", value: $maxChildrenCount, in: 1...20)
-                    
-                    Text("This limits the total number of children that can attend the playdate.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Section(header: Text("Your Children Attending")) {
                     HStack {
-                        Text("Your children attending:")
-                            .font(.subheadline)
-                        
+                        Text("Your children attending")
                         Spacer()
-                        
-                        Text("\(childrenAttending)")
-                            .font(.headline)
-                            .foregroundColor(Color("AppPrimaryColor"))
+                        Stepper("\(childrenAttending)", value: $childrenAttending, in: 1...4)
+                            .fixedSize()
                     }
-                    
-                    Stepper("", value: $childrenAttending, in: 1...4)
-                    
-                    Text("How many of your children will be attending this playdate.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                } header: {
+                    Text("Participant Limits")
                 }
                 
-                Button(action: savePlaydate) {
-                    Text("Create Playdate")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color("AppPrimaryColor"))
-                        .cornerRadius(10)
+                // MARK: - Create Button
+                Section {
+                    Button(action: savePlaydate) {
+                        Text("Create Playdate")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                    .listRowBackground(Color("AppPrimaryColor"))
+                    .foregroundColor(.white)
                 }
             }
             .navigationTitle("Create Playdate")
-            .navigationBarItems(leading: Button("Cancel") {
-                presentationMode.wrappedValue.dismiss()
-            })
+            .navigationBarItems(
+                leading: Button("Cancel") {
+                    presentationMode.wrappedValue.dismiss()
+                }
+            )
             .alert(isPresented: $showingAlert) {
                 Alert(
                     title: Text("Error"),
@@ -133,6 +136,7 @@ struct AddPlaydateView: View {
         }
     }
     
+    // MARK: - Helper Functions
     private func savePlaydate() {
         // Basic validation
         guard !title.isEmpty else {
@@ -146,9 +150,6 @@ struct AddPlaydateView: View {
             showingAlert = true
             return
         }
-        
-        // In a real app, this would save to Core Data
-        // For now, we'll just dismiss the sheet
         
         // Create a new Playdate entity in Core Data
         let newPlaydate = Playdate(context: viewContext)
