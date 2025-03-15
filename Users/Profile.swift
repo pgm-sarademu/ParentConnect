@@ -6,6 +6,7 @@ struct Profile: View {
     @State private var showingNotificationSettings = false
     @State private var showingPrivacySettings = false
     @State private var showingConnectionsView = false
+    @State private var showingAddChildSheet = false
     
     // Mock user data - in a real app this would come from Core Data or other storage
     @State private var user = MockUser.current
@@ -109,11 +110,11 @@ struct Profile: View {
                             .padding(.horizontal)
                             
                             Button(action: {
-                                // Add another child
+                                showingAddChildSheet = true
                             }) {
                                 HStack {
                                     Image(systemName: "plus")
-                                    Text("Add Another Child")
+                                    Text("Add Child")
                                 }
                                 .font(.subheadline)
                                 .foregroundColor(Color("AppPrimaryColor"))
@@ -124,7 +125,7 @@ struct Profile: View {
                             HStack {
                                 Spacer()
                                 Button(action: {
-                                    // Add child
+                                    showingAddChildSheet = true
                                 }) {
                                     HStack {
                                         Image(systemName: "plus.circle.fill")
@@ -312,6 +313,9 @@ struct Profile: View {
                 NavigationView {
                     Connections()
                 }
+            }
+            .sheet(isPresented: $showingAddChildSheet) {
+                AddChild(user: $user)
             }
         }
     }
