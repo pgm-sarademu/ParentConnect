@@ -21,6 +21,10 @@ struct Connections: View {
     @State private var userCardOffset: CGFloat = 400
     @State private var selectedUser: ParticipantInfo?
     
+    // Toast message state
+    @State private var showingToast = false
+    @State private var toastMessage = ""
+    
     var filteredConnections: [ConnectionUser] {
         if searchText.isEmpty {
             return connections
@@ -46,7 +50,7 @@ struct Connections: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                // Custom title
+                // Custom title without profile button
                 HStack {
                     Text("Connections")
                         .font(.largeTitle)
@@ -54,7 +58,7 @@ struct Connections: View {
                     Spacer()
                 }
                 .padding(.horizontal)
-                .padding(.top, 5)
+                .padding(.top, 15)
                 
                 // Search bar
                 HStack {
@@ -144,6 +148,29 @@ struct Connections: View {
                 )
                 .offset(y: userCardOffset)
                 .animation(.spring(dampingFraction: 0.7), value: userCardOffset)
+            }
+            
+            // Toast message overlay
+            if showingToast {
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.white)
+                        
+                        Text(toastMessage)
+                            .foregroundColor(.white)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                    .background(Color("AppPrimaryColor").opacity(0.9))
+                    .cornerRadius(8)
+                    .padding(.bottom, 50)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -336,6 +363,9 @@ struct Connections: View {
         
         // Remove from connections list
         connections.removeAll { $0.id == user.id }
+        
+        // Show toast message
+        showToast(message: "Connection removed")
     }
     
     private func acceptConnection(_ connection: ConnectionUser) {
@@ -355,6 +385,9 @@ struct Connections: View {
             )
             
             connections.append(newConnection)
+            
+            // Show toast message
+            showToast(message: "Connection accepted")
         }
     }
     
@@ -362,6 +395,24 @@ struct Connections: View {
         // In a real app, this would decline the connection in your database
         withAnimation {
             pendingConnections.removeAll { $0.id == connection.id }
+            
+            // Show toast message
+            showToast(message: "Connection declined")
+        }
+    }
+    
+    private func showToast(message: String) {
+        toastMessage = message
+        
+        withAnimation {
+            showingToast = true
+        }
+        
+        // Hide the toast after a delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            withAnimation {
+                showingToast = false
+            }
         }
     }
 }
