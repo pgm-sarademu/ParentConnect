@@ -5,6 +5,7 @@ struct Profile: View {
     @State private var showingFeedbackSheet = false
     @State private var showingNotificationSettings = false
     @State private var showingPrivacySettings = false
+    @State private var showingConnectionsView = false
     
     // Mock user data - in a real app this would come from Core Data or other storage
     @State private var user = MockUser.current
@@ -192,7 +193,7 @@ struct Profile: View {
                         
                         // Connections Button
                         Button(action: {
-                            // Navigate to connections view
+                            showingConnectionsView = true
                         }) {
                             HStack {
                                 Image(systemName: "person.2.fill")
@@ -306,6 +307,11 @@ struct Profile: View {
             }
             .sheet(isPresented: $showingFeedbackSheet) {
                 Feedback()
+            }
+            .sheet(isPresented: $showingConnectionsView) {
+                NavigationView {
+                    Connections()
+                }
             }
         }
     }
