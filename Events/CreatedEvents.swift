@@ -7,12 +7,50 @@ struct CreatedEvents: View {
     @State private var isLoading = true
     @State private var showingDeleteConfirmation = false
     @State private var eventToDelete: EventPreview?
+    @State private var searchText = ""
+
+    
+    var filteredEvents: [EventPreview] {
+        if searchText.isEmpty {
+            return createdEvents
+        } else {
+            return createdEvents.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                $0.location.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
+            // Custom title without profile button
+            HStack {
+                Text("Created Events")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                Spacer()
+            }
+            .padding(.horizontal)
+            .padding(.top, 15)
+            
+            // Search bar
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                TextField("Search created events", text: $searchText)
+            }
+            .padding(8)
+            .background(Color(.systemGray6))
+            .cornerRadius(10)
+            .padding(.horizontal)
+            .padding(.vertical, 10)
+            
             if isLoading {
+                Spacer()
                 ProgressView("Loading your events...")
-            } else if createdEvents.isEmpty {
+                Spacer()
+            } else if filteredEvents.isEmpty {
+                Spacer()
                 VStack(spacing: 20) {
                     Image(systemName: "calendar.badge.plus")
                         .resizable()
@@ -30,40 +68,52 @@ struct CreatedEvents: View {
                         .padding(.horizontal)
                     
                     NavigationLink(destination: AddEventView()) {
-                        Text("Create New Event")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(Color("AppPrimaryColor"))
-                            .cornerRadius(20)
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                            Text("Create New Event")
+                        }
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color("AppPrimaryColor"))
+                        .cornerRadius(20)
                     }
                     .padding(.top, 10)
                 }
                 .padding()
+                Spacer()
             } else {
-                List {
-                    ForEach(createdEvents) { event in
-                        NavigationLink(destination: EventDetail(event: event)) {
-                            CreatedEventRow(event: event)
-                        }
-                        .swipeActions(edge: .trailing) {
-                            Button(role: .destructive) {
-                                eventToDelete = event
-                                showingDeleteConfirmation = true
+                // Grid layout for events
+                ScrollView {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 165), spacing: 15)], spacing: 15) {
+                        ForEach(filteredEvents) { event in
+                            NavigationLink {
+                                EventDetail(event: event)
                             } label: {
-                                Label("Delete", systemImage: "trash")
+                                EventCardView(event: event)
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            eventToDelete = event
+                                            showingDeleteConfirmation = true
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
                             }
                         }
                     }
+                    .padding(.horizontal)
+                    .padding(.vertical, 10)
                 }
-                .listStyle(PlainListStyle())
             }
         }
-        .navigationTitle("My Created Events")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarHidden(true)
         .onAppear {
             loadCreatedEvents()
         }
+
         .alert("Delete Event?", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
@@ -80,7 +130,6 @@ struct CreatedEvents: View {
         isLoading = true
         
         // In a real app, you would fetch from Core Data with a predicate for current user ID
-        // For demo, we'll use mock data
         
         let currentDate = Date()
         let calendar = Calendar.current
@@ -119,100 +168,5 @@ struct CreatedEvents: View {
         // In a real app, you would:
         // 1. Delete from Core Data
         // 2. Sync with server if needed
-    }
-}
-
-struct CreatedEventRow: View {
-    let event: EventPreview
-    
-    var body: some View {
-        HStack(spacing: 15) {
-            // Date component
-            VStack(spacing: 2) {
-                Text(formatDay(event.date))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Text(formatDayNumber(event.date))
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("AppPrimaryColor"))
-                
-                Text(formatMonth(event.date))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .frame(width: 60)
-            .padding(.vertical, 8)
-            .background(Color("AppPrimaryColor").opacity(0.1))
-            .cornerRadius(8)
-            
-            // Event info
-            VStack(alignment: .leading, spacing: 5) {
-                Text(event.title)
-                    .font(.headline)
-                    .lineLimit(1)
-                
-                HStack {
-                    Image(systemName: "clock")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text(formatTime(event.date))
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                
-                HStack {
-                    Image(systemName: "location")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text(event.location)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                }
-            }
-            
-            Spacer()
-            
-            // Status indicator
-            VStack {
-                Text("Active")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Color.green.opacity(0.2))
-                    .foregroundColor(.green)
-                    .cornerRadius(10)
-            }
-        }
-    }
-    
-    // Add date formatting functions here
-    private func formatDay(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEE"
-        return formatter.string(from: date)
-    }
-    
-    private func formatDayNumber(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "d"
-        return formatter.string(from: date)
-    }
-    
-    private func formatMonth(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM"
-        return formatter.string(from: date)
-    }
-    
-    private func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
     }
 }

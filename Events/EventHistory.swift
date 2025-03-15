@@ -9,6 +9,8 @@ struct EventHistory: View {
     @State private var selectedEvent: EventHistoryItem?
     @State private var showingFilterOptions = false
     @State private var filterTimeFrame: TimeFrame = .allTime
+    @State private var searchText = ""
+
     
     enum TimeFrame: String, CaseIterable {
         case lastMonth = "Last Month"
@@ -18,16 +20,42 @@ struct EventHistory: View {
         case allTime = "All Time"
     }
     
+    var filteredEvents: [EventHistoryItem] {
+        if searchText.isEmpty {
+            return pastEvents
+        } else {
+            return pastEvents.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                $0.location.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
+    
     var body: some View {
-        VStack {
-            // Header with filter options
+        VStack(spacing: 0) {
+            // Custom title without profile button
             HStack {
                 Text("Event History")
-                    .font(.title2)
+                    .font(.largeTitle)
                     .fontWeight(.bold)
-                
                 Spacer()
+            }
+            .padding(.horizontal)
+            .padding(.top, 15)
+            
+            // Filter & search header
+            HStack {
+                // Search field
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                    TextField("Search event history", text: $searchText)
+                }
+                .padding(8)
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
                 
+                // Filter button
                 Button(action: {
                     showingFilterOptions = true
                 }) {
@@ -45,14 +73,13 @@ struct EventHistory: View {
                     .cornerRadius(8)
                 }
             }
-            .padding(.horizontal)
-            .padding(.top, 10)
+            .padding()
             
             if isLoading {
                 Spacer()
                 ProgressView("Loading your event history...")
                 Spacer()
-            } else if pastEvents.isEmpty {
+            } else if filteredEvents.isEmpty {
                 Spacer()
                 VStack(spacing: 15) {
                     Image(systemName: "calendar.badge.clock")
@@ -68,25 +95,26 @@ struct EventHistory: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                     
-                    Button(action: {
-                        // Navigate to events view
-                    }) {
-                        Text("Browse Upcoming Events")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(Color("AppPrimaryColor"))
-                            .cornerRadius(20)
+                    NavigationLink(destination: EventsView()) {
+                        HStack {
+                            Image(systemName: "calendar")
+                            Text("Browse Upcoming Events")
+                        }
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color("AppPrimaryColor"))
+                        .cornerRadius(20)
                     }
                     .padding(.top, 10)
                 }
                 Spacer()
             } else {
-                // Grid of past events
+                // Grid layout for past events
                 ScrollView {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 16)], spacing: 16) {
-                        ForEach(pastEvents) { event in
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 165), spacing: 16)], spacing: 16) {
+                        ForEach(filteredEvents) { event in
                             Button(action: {
                                 selectedEvent = event
                                 showingEventDetails = true
@@ -100,8 +128,8 @@ struct EventHistory: View {
                 }
             }
         }
-        .navigationTitle("Event History")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarHidden(true)
         .onAppear {
             loadPastEvents()
         }
@@ -110,6 +138,7 @@ struct EventHistory: View {
                 PastEventDetail(event: event)
             }
         }
+
         .actionSheet(isPresented: $showingFilterOptions) {
             ActionSheet(
                 title: Text("Filter by time"),
@@ -216,7 +245,7 @@ struct EventHistoryItem: Identifiable {
     let imageEmoji: String
 }
 
-// New grid card view for event history
+// Grid card view for event history
 struct EventHistoryCard: View {
     let event: EventHistoryItem
     
@@ -329,6 +358,7 @@ struct PastEventDetail: View {
     @State private var showUserCard = false
     @State private var userCardOffset: CGFloat = 400
     @State private var selectedParticipant: ParticipantInfo?
+    @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
         ZStack {
@@ -509,7 +539,16 @@ struct PastEventDetail: View {
                 .animation(.spring(dampingFraction: 0.7), value: userCardOffset)
             }
         }
-        .navigationBarTitle("Event Details", displayMode: .inline)
+        .navigationTitle("Event Details")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarItems(leading: Button(action: {
+            presentationMode.wrappedValue.dismiss()
+        }) {
+            Image(systemName: "chevron.left")
+                .foregroundColor(Color("AppPrimaryColor"))
+            Text("Back")
+                .foregroundColor(Color("AppPrimaryColor"))
+        })
         .onAppear {
             loadAttendees()
         }
