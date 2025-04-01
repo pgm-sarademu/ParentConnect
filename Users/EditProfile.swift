@@ -10,6 +10,7 @@ struct EditProfile: View {
     @State private var email: String
     @State private var showingAlert = false
     @State private var alertMessage = ""
+    @State private var showingLocationSelector = false
     
     init(user: Binding<MockUser>) {
         self._user = user
@@ -91,11 +92,23 @@ struct EditProfile: View {
                                 .font(.headline)
                                 .foregroundColor(.secondary)
                             
-                            TextField("Your location", text: $location)
+                            Button(action: {
+                                showingLocationSelector = true
+                            }) {
+                                HStack {
+                                    Text(location.isEmpty ? "Select your location" : location)
+                                        .foregroundColor(location.isEmpty ? .gray : .primary)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "mappin.and.ellipse")
+                                        .foregroundColor(Color("AppPrimaryColor"))
+                                }
                                 .padding()
                                 .background(Color(.systemGray6))
                                 .cornerRadius(10)
-                                .disableAutocorrection(true)
+                            }
                         }
                         
                         // Bio Field
@@ -157,6 +170,9 @@ struct EditProfile: View {
                         presentationMode.wrappedValue.dismiss()
                     }
                 )
+            }
+            .sheet(isPresented: $showingLocationSelector) {
+                LocationSelector(selectedLocation: $location)
             }
         }
     }

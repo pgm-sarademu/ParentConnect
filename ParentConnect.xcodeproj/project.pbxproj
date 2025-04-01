@@ -13,6 +13,7 @@
 		56AB34972D7769A6006A471B /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34962D7769A6006A471B /* LocationManager.swift */; };
 		56AB34A32D77969C006A471B /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB34A22D77969C006A471B /* Models.swift */; };
 		56AB35032D782E05006A471B /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB35022D782E05006A471B /* ConnectionManager.swift */; };
+		56AB36F92D9C517B006A471B /* LocationSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56AB36F82D9C517B006A471B /* LocationSelector.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,6 +40,7 @@
 		56AB34962D7769A6006A471B /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		56AB34A22D77969C006A471B /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		56AB35022D782E05006A471B /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
+		56AB36F82D9C517B006A471B /* LocationSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationSelector.swift; sourceTree = "<group>"; };
 		56C328CE2D723EAB005E6E8C /* ParentConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ParentConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		56C328E52D723EAD005E6E8C /* ParentConnectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ParentConnectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		56C328EF2D723EAD005E6E8C /* ParentConnectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ParentConnectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -128,6 +130,7 @@
 		56C328C52D723EAB005E6E8C = {
 			isa = PBXGroup;
 			children = (
+				56AB36F82D9C517B006A471B /* LocationSelector.swift */,
 				56AB34332D743AE7006A471B /* Home.swift */,
 				56AB36902D7DC59F006A471B /* Playdates */,
 				56AB35D92D7CBAFD006A471B /* Users */,
@@ -309,6 +312,7 @@
 				56AB34342D743AE7006A471B /* Home.swift in Sources */,
 				56AB35032D782E05006A471B /* ConnectionManager.swift in Sources */,
 				56AB348F2D763E23006A471B /* NotificationManager.swift in Sources */,
+				56AB36F92D9C517B006A471B /* LocationSelector.swift in Sources */,
 				56AB34972D7769A6006A471B /* LocationManager.swift in Sources */,
 				56AB34A32D77969C006A471B /* Models.swift in Sources */,
 			);
