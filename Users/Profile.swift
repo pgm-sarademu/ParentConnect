@@ -1,5 +1,34 @@
 import SwiftUI
 
+// Mock user model
+struct MockUser {
+    var id: String
+    var name: String
+    var email: String
+    var location: String?
+    var bio: String?
+    var children: [MockChild]?
+    
+    // Sample user data
+    static let current = MockUser(
+        id: "1",
+        name: "Sara Demulder",
+        email: "sara@example.com",
+        location: "Amsterdam, Netherlands",
+        bio: "Parent of two wonderful children. Love organizing playdates and community activities.",
+        children: [
+            MockChild(id: "1", name: "Emma", age: 4),
+            MockChild(id: "2", name: "Liam", age: 2)
+        ]
+    )
+}
+
+struct MockChild: Identifiable {
+    var id: String
+    var name: String
+    var age: Int
+}
+
 struct Profile: View {
     @State private var showingEditProfile = false
     @State private var showingFeedbackSheet = false
@@ -24,7 +53,7 @@ struct Profile: View {
                                 .overlay(
                                     Circle().stroke(Color("AppPrimaryColor"), lineWidth: 3)
                                 )
-                                .shadow(radius: 5)
+                                .shadow(radius: 3)
                             
                             Text("👩‍👦")
                                 .font(.system(size: 50))
@@ -33,33 +62,46 @@ struct Profile: View {
                         Text(user.name)
                             .font(.title2)
                             .fontWeight(.bold)
+                            .padding(.top, 10)
                         
                         if let location = user.location {
                             HStack {
                                 Image(systemName: "location.fill")
                                     .foregroundColor(Color("AppPrimaryColor"))
+                                    .font(.system(size: 14))
                                 Text(location)
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }
+                            .padding(.top, 2)
+                        }
+                        
+                        if let bio = user.bio, !bio.isEmpty {
+                            Text(bio)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 20)
+                                .padding(.top, 5)
                         }
                         
                         Button(action: {
                             showingEditProfile = true
                         }) {
-                            Text("Edit Profile")
-                                .font(.subheadline)
-                                .foregroundColor(Color("AppPrimaryColor"))
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 8)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color("AppPrimaryColor"), lineWidth: 1)
-                                )
+                            HStack {
+                                Image(systemName: "pencil")
+                                Text("Edit Profile")
+                            }
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 8)
+                            .background(Color("AppPrimaryColor"))
+                            .cornerRadius(20)
                         }
-                        .padding(.top, 5)
+                        .padding(.top, 12)
                     }
-                    .padding()
+                    .padding(.vertical, 16)
                     .background(Color(.systemBackground))
                     .cornerRadius(12)
                     .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
@@ -67,9 +109,13 @@ struct Profile: View {
                     
                     // Children section
                     VStack(alignment: .leading, spacing: 15) {
-                        Text("My Children")
-                            .font(.headline)
-                            .padding(.horizontal)
+                        HStack {
+                            Text("My Children")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
                         
                         if let children = user.children, !children.isEmpty {
                             ForEach(children) { child in
@@ -77,19 +123,18 @@ struct Profile: View {
                                     ZStack {
                                         Circle()
                                             .fill(Color("AppPrimaryColor").opacity(0.2))
-                                            .frame(width: 40, height: 40)
+                                            .frame(width: 50, height: 50)
                                         
                                         Text(child.age < 3 ? "👶" : "🧒")
                                             .font(.title2)
                                     }
                                     
-                                    VStack(alignment: .leading) {
+                                    VStack(alignment: .leading, spacing: 4) {
                                         Text(child.name)
-                                            .font(.subheadline)
-                                            .fontWeight(.medium)
+                                            .font(.headline)
                                         
                                         Text("\(child.age) years old")
-                                            .font(.caption)
+                                            .font(.subheadline)
                                             .foregroundColor(.secondary)
                                     }
                                     
@@ -99,39 +144,58 @@ struct Profile: View {
                                         // Edit child info
                                     }) {
                                         Image(systemName: "pencil")
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(Color("AppPrimaryColor"))
+                                            .font(.system(size: 16))
+                                            .padding(8)
+                                            .background(Color("AppPrimaryColor").opacity(0.1))
+                                            .clipShape(Circle())
                                     }
                                 }
                                 .padding()
                                 .background(Color(.systemBackground))
                                 .cornerRadius(12)
                                 .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+                                .padding(.horizontal)
                             }
-                            .padding(.horizontal)
                             
                             Button(action: {
                                 showingAddChildSheet = true
                             }) {
                                 HStack {
-                                    Image(systemName: "plus")
+                                    Image(systemName: "plus.circle.fill")
                                     Text("Add Child")
                                 }
                                 .font(.subheadline)
                                 .foregroundColor(Color("AppPrimaryColor"))
+                                .padding(.vertical, 8)
                             }
                             .padding(.horizontal)
                             .padding(.top, 5)
                         } else {
                             HStack {
                                 Spacer()
-                                Button(action: {
-                                    showingAddChildSheet = true
-                                }) {
-                                    HStack {
-                                        Image(systemName: "plus.circle.fill")
-                                        Text("Add Child")
+                                VStack(spacing: 12) {
+                                    Image(systemName: "person.2.badge.plus")
+                                        .font(.system(size: 40))
+                                        .foregroundColor(Color(.systemGray4))
+                                    
+                                    Text("No children added yet")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    
+                                    Button(action: {
+                                        showingAddChildSheet = true
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "plus.circle.fill")
+                                            Text("Add Child")
+                                        }
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 20)
+                                        .padding(.vertical, 10)
+                                        .background(Color("AppPrimaryColor"))
+                                        .cornerRadius(20)
                                     }
-                                    .foregroundColor(Color("AppPrimaryColor"))
                                 }
                                 Spacer()
                             }
@@ -142,54 +206,74 @@ struct Profile: View {
                             .padding(.horizontal)
                         }
                     }
-                    .padding(.vertical)
+                    .padding(.vertical, 10)
                     
-                    // New section for App Activity
+                    // App Activity section
                     VStack(alignment: .leading, spacing: 15) {
-                        Text("App Activity")
-                            .font(.headline)
-                            .padding(.horizontal)
+                        HStack {
+                            Text("App Activity")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
                         
                         // Event History Button
                         NavigationLink(destination: EventHistory()) {
                             HStack {
                                 Image(systemName: "calendar.badge.clock")
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(Color("AppPrimaryColor"))
+                                    .font(.system(size: 20))
+                                    .frame(width: 24, height: 24)
+                                
                                 Text("Event History")
+                                    .font(.headline)
                                     .foregroundColor(.primary)
+                                
                                 Spacer()
+                                
                                 Text("8 events")
-                                    .font(.caption)
+                                    .font(.subheadline)
                                     .foregroundColor(.secondary)
+                                
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
                             .padding()
                             .background(Color(.systemBackground))
                             .cornerRadius(12)
+                            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         }
-                        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         .padding(.horizontal)
                         
-                        // Created Events Button (NEW)
+                        // Created Events Button
                         NavigationLink(destination: CreatedEvents()) {
                             HStack {
                                 Image(systemName: "calendar.badge.plus")
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(Color("AppPrimaryColor"))
+                                    .font(.system(size: 20))
+                                    .frame(width: 24, height: 24)
+                                
                                 Text("Created Events")
+                                    .font(.headline)
                                     .foregroundColor(.primary)
+                                
                                 Spacer()
+                                
                                 Text("3 events")
-                                    .font(.caption)
+                                    .font(.subheadline)
                                     .foregroundColor(.secondary)
+                                
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
                             .padding()
                             .background(Color(.systemBackground))
                             .cornerRadius(12)
+                            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         }
-                        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         .padding(.horizontal)
                         
                         // Connections Button
@@ -198,30 +282,42 @@ struct Profile: View {
                         }) {
                             HStack {
                                 Image(systemName: "person.2.fill")
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(Color("AppPrimaryColor"))
+                                    .font(.system(size: 20))
+                                    .frame(width: 24, height: 24)
+                                
                                 Text("Connections")
+                                    .font(.headline)
                                     .foregroundColor(.primary)
+                                
                                 Spacer()
+                                
                                 Text("5 parents")
-                                    .font(.caption)
+                                    .font(.subheadline)
                                     .foregroundColor(.secondary)
+                                
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
                             .padding()
                             .background(Color(.systemBackground))
                             .cornerRadius(12)
+                            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         }
-                        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         .padding(.horizontal)
                     }
-                    .padding(.vertical)
+                    .padding(.vertical, 10)
                     
                     // Settings & preferences section
                     VStack(alignment: .leading, spacing: 15) {
-                        Text("Settings & Preferences")
-                            .font(.headline)
-                            .padding(.horizontal)
+                        HStack {
+                            Text("Settings & Preferences")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
                         
                         // App Ideas button
                         Button(action: {
@@ -229,18 +325,25 @@ struct Profile: View {
                         }) {
                             HStack {
                                 Image(systemName: "lightbulb")
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(Color("AppPrimaryColor"))
+                                    .font(.system(size: 20))
+                                    .frame(width: 24, height: 24)
+                                
                                 Text("Submit App Ideas")
+                                    .font(.headline)
                                     .foregroundColor(.primary)
+                                
                                 Spacer()
+                                
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
                             .padding()
                             .background(Color(.systemBackground))
                             .cornerRadius(12)
+                            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         }
-                        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         .padding(.horizontal)
                         
                         // Privacy preferences
@@ -249,18 +352,25 @@ struct Profile: View {
                         }) {
                             HStack {
                                 Image(systemName: "hand.raised")
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(Color("AppPrimaryColor"))
+                                    .font(.system(size: 20))
+                                    .frame(width: 24, height: 24)
+                                
                                 Text("Privacy Preferences")
+                                    .font(.headline)
                                     .foregroundColor(.primary)
+                                
                                 Spacer()
+                                
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
                             .padding()
                             .background(Color(.systemBackground))
                             .cornerRadius(12)
+                            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         }
-                        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         .padding(.horizontal)
                         
                         // Notification settings
@@ -269,21 +379,28 @@ struct Profile: View {
                         }) {
                             HStack {
                                 Image(systemName: "bell")
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(Color("AppPrimaryColor"))
+                                    .font(.system(size: 20))
+                                    .frame(width: 24, height: 24)
+                                
                                 Text("Notification Settings")
+                                    .font(.headline)
                                     .foregroundColor(.primary)
+                                
                                 Spacer()
+                                
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
                             .padding()
                             .background(Color(.systemBackground))
                             .cornerRadius(12)
+                            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         }
-                        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                         .padding(.horizontal)
                     }
-                    .padding(.bottom)
+                    .padding(.vertical, 10)
                     
                     // Logout button
                     Button(action: {
@@ -291,18 +408,21 @@ struct Profile: View {
                     }) {
                         Text("Log Out")
                             .font(.headline)
-                            .foregroundColor(.red)
+                            .foregroundColor(.white)
                             .padding()
                             .frame(maxWidth: .infinity)
-                            .background(Color(.systemGray6))
+                            .background(Color.red)
                             .cornerRadius(12)
                     }
                     .padding(.horizontal)
+                    .padding(.top, 10)
                     .padding(.bottom, 30)
                 }
                 .padding(.top)
             }
             .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarHidden(true)
             .sheet(isPresented: $showingEditProfile) {
                 EditProfile(user: $user)
             }
@@ -318,73 +438,6 @@ struct Profile: View {
                 AddChild(user: $user)
             }
         }
-    }
-}
-
-// Mock user model
-struct MockUser {
-    var id: String
-    var name: String
-    var email: String
-    var location: String?
-    var children: [MockChild]?
-    
-    // Sample user data
-    static let current = MockUser(
-        id: "1",
-        name: "Sara Demulder",
-        email: "sara@example.com",
-        location: "Amsterdam, Netherlands",
-        children: [
-            MockChild(id: "1", name: "Emma", age: 4),
-            MockChild(id: "2", name: "Liam", age: 2)
-        ]
-    )
-}
-
-struct MockChild: Identifiable {
-    var id: String
-    var name: String
-    var age: Int
-}
-
-struct EditProfile: View {
-    @Environment(\.presentationMode) var presentationMode
-    @Binding var user: MockUser
-    
-    @State private var name: String
-    @State private var location: String
-    
-    init(user: Binding<MockUser>) {
-        self._user = user
-        self._name = State(initialValue: user.wrappedValue.name)
-        self._location = State(initialValue: user.wrappedValue.location ?? "")
-    }
-    
-    var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Profile Information")) {
-                    TextField("Name", text: $name)
-                    TextField("Location", text: $location)
-                }
-            }
-            .navigationTitle("Edit Profile")
-            .navigationBarItems(
-                leading: Button("Cancel") {
-                    presentationMode.wrappedValue.dismiss()
-                },
-                trailing: Button("Save") {
-                    saveChanges()
-                    presentationMode.wrappedValue.dismiss()
-                }
-            )
-        }
-    }
-    
-    private func saveChanges() {
-        user.name = name
-        user.location = location
     }
 }
 

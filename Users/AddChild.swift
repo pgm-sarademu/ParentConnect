@@ -27,10 +27,12 @@ struct AddChild: View {
                 }
                 
                 Section {
-                    Button("Add Child") {
-                        addChild()
+                    Button(action: addChild) {
+                        Text("Add Child")
+                            .foregroundColor(Color("AppPrimaryColor"))
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity, alignment: .center)
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
             .navigationTitle("Add Child")
