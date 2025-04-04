@@ -24,7 +24,7 @@ struct LocationSelector: View {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
                     TextField("Search for a city or country", text: $searchText)
-                        .onChange(of: searchText) { newValue in
+                        .onChange(of: searchText) { _, newValue in
                             if newValue.count > 2 {
                                 searchLocations(query: newValue)
                             } else {
