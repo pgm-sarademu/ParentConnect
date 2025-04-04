@@ -11,7 +11,7 @@ struct MessagesView: View {
     
     var body: some View {
         NavigationView {
-            VStack {
+            VStack(spacing: 0) {
                 // Custom title with profile button
                 HStack {
                     Text("Messages")
@@ -29,77 +29,37 @@ struct MessagesView: View {
                 .padding(.horizontal)
                 .padding(.top, 5)
                 
-                // No read receipts info banner
-                HStack {
-                    Image(systemName: "info.circle.fill")
-                        .foregroundColor(Color("AppPrimaryColor"))
-                    
-                    Text("No read receipts - parents can respond when they have time")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                .background(Color("AppPrimaryColor").opacity(0.1))
-                .cornerRadius(8)
-                .padding(.horizontal)
-                
-                // Tab selector for Direct, Event, and Playdate chats
-                Picker("Chat Type", selection: $selectedTab) {
-                    Text("Direct").tag(0)
-                    Text("Event Chats").tag(1)
-                    Text("Playdate Chats").tag(2) // Added Playdate Chats tab
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding(.horizontal)
-                .padding(.top, 8)
-                
-                // Search bar
+                // Search bar moved above tabs
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
                     TextField("Search conversations", text: $searchText)
                 }
-                .padding(8)
+                .padding(12)
                 .background(Color(.systemGray6))
                 .cornerRadius(10)
                 .padding(.horizontal)
                 .padding(.vertical, 10)
                 
+                // Tab selector for Direct, Event, and Playdate chats
+                Picker("Chat Type", selection: $selectedTab) {
+                    Text("Direct").tag(0)
+                    Text("Event Chats").tag(1)
+                    Text("Playdate Chats").tag(2)
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding(.horizontal)
+                
                 if selectedTab == 0 {
                     // Direct messages tab
                     if conversations.isEmpty {
-                        VStack(spacing: 15) {
-                            Spacer()
-                            Image(systemName: "message.circle")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 80, height: 80)
-                                .foregroundColor(Color(.systemGray4))
-                            
-                            Text("No conversations yet")
-                                .font(.headline)
-                            
-                            Text("Connect with parents to start chatting")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
-                            Button(action: {
-                                // Navigate to home to find parents
-                            }) {
-                                Text("Find Parents")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 10)
-                                    .background(Color("AppPrimaryColor"))
-                                    .cornerRadius(20)
-                            }
-                            .padding(.top, 10)
-                            
-                            Spacer()
-                        }
-                        .padding()
+                        // Empty state for direct messages
+                        EmptyStateView(
+                            imageName: "message.circle",
+                            title: "No conversations yet",
+                            description: "Connect with parents to start chatting",
+                            buttonText: "Find Parents"
+                        )
                     } else {
                         // Direct messages list
                         List {
@@ -109,6 +69,8 @@ struct MessagesView: View {
                                 } label: {
                                     ConversationRow(conversation: conversation)
                                 }
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                             }
                         }
                         .listStyle(PlainListStyle())
@@ -116,35 +78,14 @@ struct MessagesView: View {
                 } else if selectedTab == 1 {
                     // Event chats tab
                     if eventChats.isEmpty {
-                        VStack(spacing: 15) {
-                            Spacer()
-                            Image(systemName: "bubble.left.and.bubble.right")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 80, height: 80)
-                                .foregroundColor(Color(.systemGray4))
-                            
-                            Text("No event chats")
-                                .font(.headline)
-                            
-                            Text("Join events to participate in group chats")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
-                            NavigationLink(destination: EventsView()) {
-                                Text("Browse Events")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 10)
-                                    .background(Color("AppPrimaryColor"))
-                                    .cornerRadius(20)
-                            }
-                            .padding(.top, 10)
-                            
-                            Spacer()
-                        }
-                        .padding()
+                        // Empty state for event chats with navigation destination
+                        EmptyStateViewWithNavigation(
+                            imageName: "bubble.left.and.bubble.right",
+                            title: "No event chats",
+                            description: "Join events to participate in group chats",
+                            buttonText: "Browse Events",
+                            destination: EventsView()
+                        )
                     } else {
                         // Event chats list
                         List {
@@ -154,6 +95,8 @@ struct MessagesView: View {
                                 } label: {
                                     EventChatRow(eventChat: eventChat)
                                 }
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                             }
                         }
                         .listStyle(PlainListStyle())
@@ -161,35 +104,14 @@ struct MessagesView: View {
                 } else {
                     // Playdate chats tab
                     if playdateChats.isEmpty {
-                        VStack(spacing: 15) {
-                            Spacer()
-                            Image(systemName: "bubble.left.and.bubble.right")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 80, height: 80)
-                                .foregroundColor(Color(.systemGray4))
-                            
-                            Text("No playdate chats")
-                                .font(.headline)
-                            
-                            Text("Join playdates to participate in group chats")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
-                            NavigationLink(destination: Playdates()) {
-                                Text("Browse Playdates")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 10)
-                                    .background(Color("AppPrimaryColor"))
-                                    .cornerRadius(20)
-                            }
-                            .padding(.top, 10)
-                            
-                            Spacer()
-                        }
-                        .padding()
+                        // Empty state for playdate chats with navigation destination
+                        EmptyStateViewWithNavigation(
+                            imageName: "bubble.left.and.bubble.right",
+                            title: "No playdate chats",
+                            description: "Join playdates to participate in group chats",
+                            buttonText: "Browse Playdates",
+                            destination: Playdates()
+                        )
                     } else {
                         // Playdate chats list
                         List {
@@ -197,8 +119,10 @@ struct MessagesView: View {
                                 NavigationLink {
                                     GroupChat(eventId: playdateChat.eventId, eventTitle: playdateChat.eventTitle)
                                 } label: {
-                                    EventChatRow(eventChat: playdateChat) // Reusing the same row component
+                                    EventChatRow(eventChat: playdateChat)
                                 }
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                             }
                         }
                         .listStyle(PlainListStyle())
@@ -208,7 +132,7 @@ struct MessagesView: View {
             .onAppear {
                 loadMockConversations()
                 loadUserEventChats()
-                loadUserPlaydateChats() // Added for playdate chats
+                loadUserPlaydateChats()
             }
             .sheet(isPresented: $showingProfileView) {
                 Profile()
@@ -417,6 +341,102 @@ struct MessagesView: View {
     }
 }
 
+// Non-generic empty state view with action closure
+struct EmptyStateView: View {
+    let imageName: String
+    let title: String
+    let description: String
+    let buttonText: String
+    var action: (() -> Void)? = nil
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Spacer()
+            
+            Image(systemName: imageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 80, height: 80)
+                .foregroundColor(Color(.systemGray4))
+            
+            Text(title)
+                .font(.headline)
+            
+            Text(description)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+            
+            if let action = action {
+                Button(action: action) {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                        Text(buttonText)
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Color("AppPrimaryColor"))
+                    .cornerRadius(20)
+                }
+                .padding(.top, 10)
+            }
+            
+            Spacer()
+        }
+        .padding()
+    }
+}
+
+// Separate non-generic view for empty state with navigation
+struct EmptyStateViewWithNavigation<Destination: View>: View {
+    let imageName: String
+    let title: String
+    let description: String
+    let buttonText: String
+    let destination: Destination
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Spacer()
+            
+            Image(systemName: imageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 80, height: 80)
+                .foregroundColor(Color(.systemGray4))
+            
+            Text(title)
+                .font(.headline)
+            
+            Text(description)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+            
+            NavigationLink(destination: destination) {
+                HStack {
+                    Image(systemName: "plus.circle.fill")
+                    Text(buttonText)
+                }
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(Color("AppPrimaryColor"))
+                .cornerRadius(20)
+            }
+            .padding(.top, 10)
+            
+            Spacer()
+        }
+        .padding()
+    }
+}
+
 // New model for event chats
 struct EventChatPreview: Identifiable {
     let id = UUID().uuidString
@@ -428,7 +448,7 @@ struct EventChatPreview: Identifiable {
     let unreadCount: Int
 }
 
-// Row for displaying event chats
+// Row for displaying event chats - improved visual design
 struct EventChatRow: View {
     let eventChat: EventChatPreview
     
@@ -444,7 +464,7 @@ struct EventChatRow: View {
                     .font(.title)
             }
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 5) {
                 HStack {
                     Text(eventChat.eventTitle)
                         .font(.headline)
@@ -462,26 +482,32 @@ struct EventChatRow: View {
                         .foregroundColor(.secondary)
                 }
                 
-                HStack {
-                    Text(eventChat.lastMessage)
-                        .font(.subheadline)
-                        .foregroundColor(eventChat.unreadCount > 0 ? .primary : .secondary)
-                        .lineLimit(1)
-                    
-                    Spacer()
-                    
-                    if eventChat.unreadCount > 0 {
-                        Text("\(eventChat.unreadCount)")
+                Text(eventChat.lastMessage)
+                    .font(.subheadline)
+                    .foregroundColor(eventChat.unreadCount > 0 ? .primary : .secondary)
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                // Adding the unread counter to a new line to avoid crowding
+                if eventChat.unreadCount > 0 {
+                    HStack {
+                        Spacer()
+                        Text("\(eventChat.unreadCount) new")
                             .font(.caption)
-                            .padding(6)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
                             .background(Color("AppPrimaryColor"))
                             .foregroundColor(.white)
-                            .clipShape(Circle())
+                            .cornerRadius(10)
                     }
+                    .padding(.top, 2)
                 }
             }
         }
         .padding(.vertical, 8)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.08), radius: 3, x: 0, y: 1)
     }
     
     private func formatDate(_ date: Date) -> String {
@@ -509,6 +535,7 @@ struct ConversationPreview: Identifiable {
     let unread: Bool
 }
 
+// Improved conversation row
 struct ConversationRow: View {
     let conversation: ConversationPreview
     
@@ -524,7 +551,7 @@ struct ConversationRow: View {
                     .font(.title)
             }
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 5) {
                 HStack {
                     Text(conversation.participantName)
                         .font(.headline)
@@ -537,13 +564,26 @@ struct ConversationRow: View {
                         .foregroundColor(.secondary)
                 }
                 
-                Text(conversation.lastMessage)
-                    .font(.subheadline)
-                    .foregroundColor(conversation.unread ? .primary : .secondary)
-                    .lineLimit(1)
+                HStack {
+                    Text(conversation.lastMessage)
+                        .font(.subheadline)
+                        .foregroundColor(conversation.unread ? .primary : .secondary)
+                        .lineLimit(1)
+                    
+                    Spacer()
+                    
+                    if conversation.unread {
+                        Circle()
+                            .fill(Color("AppPrimaryColor"))
+                            .frame(width: 10, height: 10)
+                    }
+                }
             }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 10)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.08), radius: 3, x: 0, y: 1)
     }
     
     private func formatDate(_ date: Date) -> String {
