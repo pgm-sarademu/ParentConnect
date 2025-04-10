@@ -164,11 +164,9 @@ struct EditProfile: View {
             )
             .alert(isPresented: $showingAlert) {
                 Alert(
-                    title: Text("Profile Updated"),
+                    title: Text("Error"),
                     message: Text(alertMessage),
-                    dismissButton: .default(Text("OK")) {
-                        presentationMode.wrappedValue.dismiss()
-                    }
+                    dismissButton: .default(Text("OK"))
                 )
             }
             .sheet(isPresented: $showingLocationSelector) {
@@ -180,12 +178,14 @@ struct EditProfile: View {
     private func saveChanges() {
         // Basic validation
         guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            showErrorAlert(message: "Please enter your name")
+            alertMessage = "Please enter your name"
+            showingAlert = true
             return
         }
         
         guard !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            showErrorAlert(message: "Please enter your email")
+            alertMessage = "Please enter your email"
+            showingAlert = true
             return
         }
         
@@ -195,9 +195,8 @@ struct EditProfile: View {
         user.location = location
         user.bio = bio
         
-        // Show success message
-        alertMessage = "Your profile has been updated successfully!"
-        showingAlert = true
+        // Simply dismiss the view without showing a success message
+        presentationMode.wrappedValue.dismiss()
     }
     
     private func showErrorAlert(message: String) {

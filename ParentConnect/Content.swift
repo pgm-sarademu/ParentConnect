@@ -62,8 +62,8 @@ struct LoginView: View {
     
     var body: some View {
         VStack(spacing: 25) {
-            // App logo/icon
-            Image(systemName: "figure.2.and.child.holdinghands.circle.fill")
+            // App logo/icon - FIXED: Using a valid SF Symbol
+            Image(systemName: "figure.2.circle.fill")
                 .font(.system(size: 80))
                 .foregroundColor(Color("AppPrimaryColor"))
                 .padding(.bottom, 20)
