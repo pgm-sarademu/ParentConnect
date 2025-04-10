@@ -29,7 +29,7 @@ struct MessagesView: View {
                 .padding(.horizontal)
                 .padding(.top, 5)
                 
-                // Search bar moved above tabs
+                // Search bar
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
@@ -49,6 +49,7 @@ struct MessagesView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal)
+                .padding(.bottom, 10)
                 
                 if selectedTab == 0 {
                     // Direct messages tab
@@ -62,18 +63,19 @@ struct MessagesView: View {
                         )
                     } else {
                         // Direct messages list
-                        List {
-                            ForEach(filteredConversations) { conversation in
-                                NavigationLink {
-                                    ChatView(conversation: conversation)
-                                } label: {
-                                    ConversationRow(conversation: conversation)
+                        ScrollView {
+                            LazyVStack(spacing: 15) {
+                                ForEach(filteredConversations) { conversation in
+                                    NavigationLink {
+                                        ChatView(conversation: conversation)
+                                    } label: {
+                                        ConversationRow(conversation: conversation)
+                                    }
                                 }
-                                .listRowSeparator(.hidden)
-                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                             }
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
                         }
-                        .listStyle(PlainListStyle())
                     }
                 } else if selectedTab == 1 {
                     // Event chats tab
@@ -88,18 +90,19 @@ struct MessagesView: View {
                         )
                     } else {
                         // Event chats list
-                        List {
-                            ForEach(filteredEventChats) { eventChat in
-                                NavigationLink {
-                                    GroupChat(eventId: eventChat.eventId, eventTitle: eventChat.eventTitle)
-                                } label: {
-                                    EventChatRow(eventChat: eventChat)
+                        ScrollView {
+                            LazyVStack(spacing: 15) {
+                                ForEach(filteredEventChats) { eventChat in
+                                    NavigationLink {
+                                        GroupChat(eventId: eventChat.eventId, eventTitle: eventChat.eventTitle)
+                                    } label: {
+                                        EventChatRow(eventChat: eventChat)
+                                    }
                                 }
-                                .listRowSeparator(.hidden)
-                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                             }
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
                         }
-                        .listStyle(PlainListStyle())
                     }
                 } else {
                     // Playdate chats tab
@@ -114,18 +117,19 @@ struct MessagesView: View {
                         )
                     } else {
                         // Playdate chats list
-                        List {
-                            ForEach(filteredPlaydateChats) { playdateChat in
-                                NavigationLink {
-                                    GroupChat(eventId: playdateChat.eventId, eventTitle: playdateChat.eventTitle)
-                                } label: {
-                                    EventChatRow(eventChat: playdateChat)
+                        ScrollView {
+                            LazyVStack(spacing: 15) {
+                                ForEach(filteredPlaydateChats) { playdateChat in
+                                    NavigationLink {
+                                        GroupChat(eventId: playdateChat.eventId, eventTitle: playdateChat.eventTitle)
+                                    } label: {
+                                        EventChatRow(eventChat: playdateChat)
+                                    }
                                 }
-                                .listRowSeparator(.hidden)
-                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                             }
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
                         }
-                        .listStyle(PlainListStyle())
                     }
                 }
             }
@@ -137,6 +141,8 @@ struct MessagesView: View {
             .sheet(isPresented: $showingProfileView) {
                 Profile()
             }
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarHidden(true)
         }
     }
     
@@ -356,7 +362,7 @@ struct EmptyStateView: View {
             Image(systemName: imageName)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 80, height: 80)
+                .frame(width: 70, height: 70)
                 .foregroundColor(Color(.systemGray4))
             
             Text(title)
@@ -405,7 +411,7 @@ struct EmptyStateViewWithNavigation<Destination: View>: View {
             Image(systemName: imageName)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 80, height: 80)
+                .frame(width: 70, height: 70)
                 .foregroundColor(Color(.systemGray4))
             
             Text(title)
@@ -505,6 +511,7 @@ struct EventChatRow: View {
             }
         }
         .padding(.vertical, 8)
+        .padding(.horizontal, 12)
         .background(Color(.systemBackground))
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.08), radius: 3, x: 0, y: 1)
@@ -581,6 +588,7 @@ struct ConversationRow: View {
             }
         }
         .padding(.vertical, 10)
+        .padding(.horizontal, 12)
         .background(Color(.systemBackground))
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.08), radius: 3, x: 0, y: 1)

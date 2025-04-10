@@ -24,7 +24,7 @@ struct Activities: View {
     
     var body: some View {
         NavigationView {
-            VStack {
+            VStack(spacing: 0) {
                 // Custom title with profile button
                 HStack {
                     Text("Activities")
@@ -41,6 +41,20 @@ struct Activities: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 5)
+                
+                // Custom search and filter bar
+                HStack {
+                    // Search field
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.secondary)
+                        TextField("Search activities", text: $searchText)
+                    }
+                    .padding(8)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
+                }
+                .padding()
                 
                 // Category selector
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -68,31 +82,43 @@ struct Activities: View {
                     }
                     .padding(.horizontal)
                 }
+                .padding(.bottom, 10)
                 
-                // Search bar
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
-                    TextField("Search activities", text: $searchText)
-                }
-                .padding(8)
-                .background(Color(.systemGray6))
-                .cornerRadius(10)
-                .padding(.horizontal)
-                .padding(.vertical, 10)
-                
-                // Activities grid
-                ScrollView {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 16)], spacing: 16) {
-                        ForEach(filteredActivities) { activity in
-                            NavigationLink {
-                                ActivityDetail(activity: activity)
-                            } label: {
-                                ActivityCard(activity: activity)
+                if filteredActivities.isEmpty {
+                    // Empty state view
+                    VStack(spacing: 20) {
+                        Spacer()
+                        Image(systemName: "square.and.pencil")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 70, height: 70)
+                            .foregroundColor(Color(.systemGray4))
+                        
+                        Text("No activities found")
+                            .font(.headline)
+                        
+                        Text("Try a different category or search term")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        
+                        Spacer()
+                    }
+                } else {
+                    // Activities grid
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 16)], spacing: 16) {
+                            ForEach(filteredActivities) { activity in
+                                NavigationLink {
+                                    ActivityDetail(activity: activity)
+                                } label: {
+                                    ActivityCard(activity: activity)
+                                }
                             }
                         }
+                        .padding()
                     }
-                    .padding()
                 }
             }
             .onAppear {
@@ -101,6 +127,8 @@ struct Activities: View {
             .sheet(isPresented: $showingProfileView) {
                 Profile()
             }
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarHidden(true)
         }
     }
     
@@ -129,36 +157,44 @@ struct ActivityCard: View {
     let activity: ActivityItem
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 0) {
             // Activity image placeholder
-            ZStack {
+            ZStack(alignment: .bottomLeading) {
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
-                    .aspectRatio(4/3, contentMode: .fit)
+                    .aspectRatio(1.2, contentMode: .fit)
                     .cornerRadius(8)
                 
                 Text(activityEmoji(for: activity.type))
                     .font(.system(size: 40))
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(activity.title)
-                    .font(.headline)
-                    .lineLimit(2)
                 
+                // Category badge
                 Text(activity.type)
                     .font(.caption)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color("AppPrimaryColor").opacity(0.2))
-                    .foregroundColor(Color("AppPrimaryColor"))
-                    .cornerRadius(4)
+                    .background(Color("AppPrimaryColor"))
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    .padding(8)
             }
-            .padding(8)
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text(activity.title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .lineLimit(2)
+                
+                Text(activity.description)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+            .padding(10)
         }
         .background(Color(.systemBackground))
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .foregroundColor(.primary) // Ensure text isn't blue when in a NavigationLink
     }
     
     private func activityEmoji(for type: String) -> String {
